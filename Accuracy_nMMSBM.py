@@ -1,0 +1,629 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import sparse
+from copy import copy as copy
+import itertools
+from sklearn import metrics
+import pickle
+import sys
+import sktensor
+
+#// region Tools
+
+def normalized(a, dicForm=False):
+    newCoords, vals = [], []
+    dicMax={}
+    dic={}
+
+    nnz = set(zip(*a.nonzero()[:-1]))
+    lg=len(nnz)
+    for ind, c in enumerate(nnz):
+        if ind%1000==0: print("Normalizing", ind*100./lg, "%")
+
+        if c not in dicMax: dicMax[c] = np.sum(a[c])
+
+        if dicForm:
+            dic[c]=a[c].todense()/dicMax[c]
+        else:
+            for i in range(len(a[c].nonzero())):
+                vals.append(dicMax[c])
+
+    if dicForm:
+        return dic
+    else:
+        vals = np.array(a.data / np.array(vals), dtype=float)
+        aNew = sparse.COO(a.nonzero(), vals, shape=a.shape)
+        return aNew
+
+def dicsToList(tabK, *a):
+    nba = len(a)
+    lists = [[] for _ in range(nba)]
+    for k in tabK:
+        for i in range(nba):
+            lists[i].append(a[i][k])
+
+    for i in range(nba):
+        lists[i]=np.array(lists[i])
+
+    return lists
+
+def rescale(a):
+    newCoords, vals, sub = [], [], []
+    dicMax={}
+    dicMin={}
+    for f in zip(*a.nonzero()):
+        c = f[:-1]
+        if c not in dicMax: dicMax[c] = np.max(a[c])
+        if c not in dicMin: dicMin[c] = np.min(a[c])
+        vals.append(dicMax[c])
+        sub.append(dicMin[c])
+    vals, sub = np.array(vals), np.array(sub)
+    vals = np.array((a.data-sub) / (vals-sub), dtype=float)
+    aNew = sparse.COO(a.nonzero(), vals, shape=a.shape)
+    return aNew
+
+#// endregion
+
+#// region Manipulates the data files
+
+def readMatrix(filename):
+    try:
+        return sparse.load_npz(filename.replace(".txt", ".npz"))
+    except:
+        try:
+            return np.load(filename.replace(".txt", ".npy"))
+        except:
+            with open(filename, 'r') as outfile:
+                dims = outfile.readline().replace("# Array shape: (", "").replace(")", "").replace("\n", "").split(", ")
+                for i in range(len(dims)):
+                    dims[i]=int(dims[i])
+
+            new_data = np.loadtxt(filename).reshape(dims)
+            return new_data
+
+
+    #return sparse.csr_matrix(new_data)
+
+
+def recoverData(folder, DS):
+
+    strT = ""
+    for f, interp in enumerate(DS):
+        for i in range(interp):
+            strT+=str(f)+"-"
+    strT = strT[:-1]+"_"
+    print(strT)
+    alpha_Tr, alpha_Te = readMatrix("Data/" + folder + "/"+strT+"AlphaTr.npz"), readMatrix("Data/" + folder + "/"+strT+"AlphaTe.npz")
+
+    return alpha_Tr, alpha_Te
+
+
+def recoverParams(folder, nbClus, nbInterp, final = True, run=-1):
+    strT = ""
+    for f, [interp, clus] in enumerate(zip(nbInterp, nbClus)):
+        for i in range(interp):
+            strT += str(clus) + "-"
+    strT = strT[:-1] + "_"
+    if final:
+        run=-1
+        featToClus = []
+        popFeat = []
+        with open("Output/" + folder+"/Final/T="+strT+"%.0f_Inter_FeatToClus.txt" %run, encoding="utf-8") as f:
+            for line in f:
+                feat, clus, pop = line.replace("\n", "").split("\t")
+                featToClus.append(int(clus))
+                popFeat.append(pop)
+        p = readMatrix("Output/" + folder+"/Final/T="+strT+"%.0f_Inter_p.npy" %run)
+        thetas = []
+        for i in range(len(set(featToClus))):
+            theta = readMatrix("Output/" + folder+"/Final/T="+strT+"%.0f_theta_%.0f_Inter_theta.npy" %(run, i))
+            thetas.append(theta)
+    else:
+        featToClus = []
+        popFeat = []
+        with open("Output/" + folder+"/T="+strT+"%.0f_Inter_FeatToClus.txt" %run, encoding="utf-8") as f:
+            for line in f:
+                feat, clus, pop = line.replace("\n", "").split("\t")
+                featToClus.append(int(clus))
+                popFeat.append(pop)
+        p = readMatrix("Output/" + folder+"/T="+strT+"%.0f_Inter_p.npy" %run)
+        thetas = []
+        for i in range(len(set(featToClus))):
+            theta = readMatrix("Output/" + folder+"/T="+strT+"%.0f_theta_%.0f_Inter_theta.npy" %(run, i))
+            thetas.append(theta)
+
+    return thetas, p, featToClus, popFeat
+
+
+def saveResults(tabMetricsAll, folder, DS, printRes=True, final=False):
+    try:
+        if final:
+            txtFin = "/Final/"
+        else:
+            txtFin = ""
+
+        with open("Output/" + folder + txtFin + f"/{DS}_Results.txt", "w+") as f:
+            for label in tabMetricsAll:
+                f.write(label+"\t")
+                for metric in tabMetricsAll[label]:
+                    f.write("%.4f, " % (tabMetricsAll[label][metric]))
+                f.write("\n")
+                if printRes:
+                    print(label + " " + str(tabMetricsAll[label]))
+    except Exception as e:
+        print(e)
+        pass
+
+
+def loadModel(folder, DS, model="NB"):
+    strT = ""
+    for f, interp in enumerate(DS):
+        for i in range(interp):
+            strT += str(f) + "-"
+    strT = strT[:-1]
+    filename = f"Output/{folder}/" + strT + f"_{model}.sav"
+
+    return pickle.load(open(filename, 'rb'))
+
+def loadMF(folder, DS, model="NMF"):
+    strT = ""
+    for f, interp in enumerate(DS):
+        for i in range(interp):
+            strT += str(f) + "-"
+    strT = strT[:-1]
+    filename = f"Output/{folder}/" + strT + f"_{model}_"
+    W = np.load(filename+"W.npy")
+    H = np.load(filename+"H.npy")
+    coordToInt = {}
+    with open(filename+"coordToInt.txt", "r") as f:
+        for line in f:
+            l = line.replace("\n", "").split("\t")
+            coordToInt[l[0]] = int(l[1])
+
+    return W, H, coordToInt
+
+def loadTF(folder, DS, model="TF"):
+    strT = ""
+    for f, interp in enumerate(DS):
+        for i in range(interp):
+            strT += str(f) + "-"
+    strT = strT[:-1]
+    filename = f"Output/{folder}/" + strT + f"_{model}_"
+    modU = np.load(f"{filename}U.npy", allow_pickle=True)
+    modCore = np.load(f"{filename}core.npy", allow_pickle=True)
+
+    return modU, modCore
+
+#// endregion
+
+#// region Build probs
+def getDataTe(folder, featuresData, DS, lim=1e20):
+    folderName = "Data/" + folder
+
+    outToInt = {}
+    featToInt = [{} for i in range(len(featuresData))]
+
+    strDS = ""
+    for f, interp in enumerate(DS):
+        for i in range(interp):
+            strDS+=str(f)+"-"
+    strDS = strDS[:-1]+"_"
+    with open(folderName + "/"+strDS+"IDTe.txt") as f:
+        IDsTe = f.read().replace("[", "").replace("]", "").split(", ")
+        IDsTe = np.array(IDsTe, dtype=int)
+
+    with open(folderName + "/"+strDS+"outToInt.txt", encoding="utf-8") as f:
+        for line in f:
+            lab, num = line.replace("\n", "").split("\t")
+            num=int(num)
+            outToInt[lab]=num
+
+    for i in range(len(featuresData)):
+        with open(folderName + "/"+strDS+"featToInt_%.0f.txt" % featuresData[i], "r", encoding="utf-8") as f:
+            for line in f:
+                lab, num = line.replace("\n", "").split("\t")
+                num = int(num)
+                featToInt[i][lab] = num
+
+    outcome = {}
+    listOuts = set()
+    ind=0
+    lg=len(IDsTe)
+    #lg = open(folderName + "/outcome.txt", "r", encoding="utf-8").read().count("\n")
+    with open(folderName + "/outcome.txt", "r", encoding="utf-8") as f:
+        j=0
+        for line in f:
+            num, out = line.replace("\n", "").split("\t")
+            num = int(num)
+            if num not in IDsTe: continue
+            if j%1==0: print("Outcomes:", j*100/lg, "%")
+            j+=1
+            if j==len(IDsTe): break
+            out = out.split(" ")
+            outcome[num]=[]
+            for o in out:
+                listOuts.add(o)
+                if o not in outToInt:
+                    continue
+                outcome[num].append(outToInt[o])
+
+            if j>lim: break
+
+    features = []
+    listFeatures = []
+    for i in range(len(featuresData)):
+        features.append({})
+        listFeatures.append(set())
+        lg=len(IDsTe)
+        #lg = open(folderName + "/feature_%.0f.txt" %i, "r", encoding="utf-8").read().count("\n")
+        with open(folderName + "/feature_%.0f.txt" % featuresData[i], "r", encoding="utf-8") as f:
+            j=0
+            for line in f:
+                num, feat = line.replace("\n", "").split("\t")
+                num = int(num)
+                if num not in IDsTe: continue
+                if j%1==0: print(f"Features {featuresData[i]}:", j*100/lg, "%")
+                j+=1
+                if j==len(IDsTe): break
+                feat = feat.split(" ")
+                features[i][num] = []
+                for f in feat:
+                    listFeatures[i].add(f)
+                    if f not in featToInt[i]:
+                        continue
+                    features[i][num].append(featToInt[i][f])
+
+                if j > lim: break
+
+    return features, outcome, featToInt, outToInt, IDsTe
+
+
+def getProbs(alpha, thetas, p, featToClus):
+    nbFeat = len(featToClus)
+    coords = alpha.nonzero()
+    vals = []
+    p = np.moveaxis(p, -1, 0)
+    for f in zip(*coords):
+        probs = p[f[-1]]
+        for i in range(nbFeat):
+            tet = thetas[featToClus[nbFeat - i - 1]][f[nbFeat - i - 1]]  # k
+            probs = probs.dot(tet)
+        v = probs
+        if v == 0: v = 1e-20
+        vals.append(v)
+    probs = sparse.COO(coords, vals, shape=alpha_Te.shape)
+    return probs
+
+
+def getIndsMod(DS, nbInterp):
+    indsMod = []
+    ind = 0
+    for i in range(len(DS)):
+        for j in range(nbInterp[i]):
+            indsMod.append(ind+j)
+        ind += DS[i]
+
+    return np.array(indsMod)
+
+
+def getProbTF(k, U, core):
+    from TF import tensor_ttv
+
+    ndims = len(k)
+    ind = k
+
+    '''
+    Ui_list = [U[c][ind[c]] for c in range(ndims)]
+
+    prediction = []  # Predict every output
+
+    Ui_list_temp = Ui_list + [U[-1]]
+    pred_Y = tensor_ttv(core, Ui_list_temp)
+    prediction.append(pred_Y)
+
+    prediction = np.array(prediction)
+    print(prediction.shape)
+    '''
+
+    pr = core
+    for c in range(ndims):
+        pr = np.tensordot(U[c][ind[c]], pr, axes=1)
+
+    pr = U[-1].dot(pr)
+    pr /= np.sum(pr)
+
+    return pr
+
+
+def getElemProb(c, thetas, p, featToClus):
+    nbFeat = len(featToClus)
+
+    p = np.moveaxis(p, -1, 0)
+    probs = p
+    for i in range(nbFeat):
+        tet = thetas[featToClus[nbFeat - i - 1]][c[nbFeat - i - 1]]  # k
+        probs = probs.dot(tet)
+    v = probs
+
+    return v
+
+
+def buildArraysProbs(folder, features, DS, alpha, alphaTe, tabThetas, tabP, tabFeatToClus, tabNbInterp):
+    features, outcome, featToInt, outToInt, IDsTe = getDataTe(folder, features, DS, lim=1e20)
+
+    thetasMod1, thetasMod2, thetasMod3 = tabThetas
+    pMod1, pMod2, pMod3 = tabP
+    featToClusMod1, featToClusMod2, featToClusMod3 = tabFeatToClus
+    nbInterpMod1, nbInterpMod2, nbInterpMod3 = tabNbInterp
+
+    indsMod1 = getIndsMod(DS, nbInterpMod1)
+    indsMod2 = getIndsMod(DS, nbInterpMod2)
+    indsMod3 = getIndsMod(DS, nbInterpMod3)
+
+    print("Build BL")
+    pBL = alpha.sum(list(range(len(alpha_Tr.shape)-1))).todense()
+    pBL = pBL/sum(pBL)
+
+    print("Build PF")
+    pPF = normalized(alphaTe, dicForm=True)
+
+    modKNN = loadModel(folder, DS, model="KNN")
+    modNB = loadModel(folder, DS, model="NB")
+    WNMF, HNMF, coordToInt = loadMF(folder, DS, model="NMF")
+    modU, modCore = loadTF(folder, DS, model="TF")
+
+    nbOut = alpha_Te.shape[-1]
+
+    lg = len(IDsTe)
+    nb=0
+    dicTrue, dicProbMod1, dicProbMod2, dicProbMod3, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+    for j, id in enumerate(IDsTe):
+        if j % 10 == 0: print("Build list probs", j * 100. / lg, "%")
+        if j*100./lg>0.2 and False:
+            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+            break
+
+        if id not in outcome: continue
+
+        """
+        toProd = []
+        for i in range(len(features)):
+            for interp in range(DS[i]):
+                toProd.append(features[i][id])
+        listKeys = list(itertools.product(*toProd))
+        """
+
+        toProd = []
+        for i in range(len(features)):
+            toProd.append(list(itertools.combinations(features[i][id], r=DS[i])))
+        #toProd.append(list(itertools.combinations(outcome[id], r=1)))
+        listKeys = list(itertools.product(*toProd))
+        if listKeys==[]: continue
+
+        ''' Biased ; repeat evaluation several times for one document
+        for k in []:
+            karray = np.array(k)
+            nb+=1
+            if k not in dicTrue:
+                a=np.zeros((nbOut))
+                for o in outcome[id]:
+                    a[o] = 1
+                dicTrue[k] = a
+
+            if k not in dicProbBL: dicProbBL[k]=pBL
+            if k not in dicProbPF:
+                try:dicProbPF[k] = pPF[k]
+                except:dicProbPF[k] = np.zeros((nbOut))
+
+            if k not in dicProbMod1: dicProbMod1[k]=getElemProb(karray[indsMod1], thetasMod1, pMod1, featToClusMod1)
+            if k not in dicProbMod2: dicProbMod2[k]=getElemProb(karray[indsMod2], thetasMod2, pMod2, featToClusMod2)
+            if k not in dicProbMod3: dicProbMod3[k]=getElemProb(karray[indsMod3], thetasMod3, pMod3, featToClusMod3)
+            if k not in dicProbRand: dicProbRand[k]=np.random.random((nbOut))
+
+            if k not in dicWeights: dicWeights[k]=0
+            dicWeights[k]+=1
+        '''
+
+        tempProbMod1, tempProbMod2, tempProbMod3, tempProbBL, tempProbPF, tempProbNMF, tempProbTF, tempProbKNN, tempProbNB, tempProbRand = [], [], [], [], [], [], [], [], [], []
+        for ktup in listKeys:
+            k = sum(ktup, ())
+            karray = np.array(k)
+            nb+=1
+
+            tempProbBL.append(pBL)
+            try:tempProbPF.append(pPF[k])
+            except:tempProbPF.append(np.zeros((nbOut)))
+
+            tempProbMod1.append(getElemProb(karray[indsMod1], thetasMod1, pMod1, featToClusMod1))
+            tempProbMod2.append(getElemProb(karray[indsMod2], thetasMod2, pMod2, featToClusMod2))
+            tempProbMod3.append(getElemProb(karray[indsMod3], thetasMod3, pMod3, featToClusMod3))
+
+            try: tempProbNMF.append(WNMF[coordToInt[str(k)]].dot(HNMF))
+            except: tempProbNMF.append(np.zeros((nbOut)))
+
+            tempProbTF.append(getProbTF(karray, modU, modCore))
+
+            tempProbKNN.append(modKNN.predict_proba([karray])[0])
+            tempProbNB.append(modNB.predict_proba([karray])[0])
+
+            rnd = np.random.random((nbOut))
+            rnd/=np.sum(rnd)
+            tempProbRand.append(rnd)
+
+
+        a = np.zeros((nbOut))
+        for o in outcome[id]:
+            a[o] = 1
+
+        dicTrue[j] = a
+        dicProbMod1[j]=np.mean(tempProbMod1, axis=0)
+        dicProbMod2[j]=np.mean(tempProbMod2, axis=0)
+        dicProbMod3[j]=np.mean(tempProbMod3, axis=0)
+        dicProbPF[j]=np.mean(tempProbPF, axis=0)
+        dicProbBL[j]=np.mean(tempProbBL, axis=0)
+        dicProbNMF[j]=np.mean(tempProbNMF, axis=0)
+        dicProbTF[j]=np.mean(tempProbTF, axis=0)
+        dicProbKNN[j]=np.mean(tempProbKNN, axis=0)
+        dicProbNB[j]=np.mean(tempProbNB, axis=0)
+        dicProbRand[j]=np.mean(tempProbRand, axis=0)
+
+        if j not in dicWeights: dicWeights[j]=0
+        dicWeights[j]+=1
+
+
+
+    tabK = list(dicTrue.keys())
+    listTrue, listProbMod1, listProbMod2, listProbMod3, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
+        dicsToList(tabK, dicTrue, dicProbMod1, dicProbMod2, dicProbMod3, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights)
+    print(nb, len(listWeights))
+    print("Min coverage error:", np.average(np.sum(listTrue, axis=1), weights=listWeights)-1)
+    return listTrue, listProbMod1, listProbMod2, listProbMod3, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights
+
+#// endregion
+
+#// region Metrics
+
+def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
+    listTrue = np.vstack((listTrue, np.ones((nbOut))))  # Pour eviter qu'une classe n'ait aucun ex negatif ; prendre la moyenne weighted si on utilise ca !
+    listProbs = np.vstack((listProbs, np.ones((nbOut))))
+    listWeights = np.append(listWeights, 1e-10)
+    if label not in tabMetricsAll: tabMetricsAll[label]={}
+    print(f"Scores {label}")
+    tabMetricsAll[label]["F1"], tabMetricsAll[label]["Acc"] = 0, 0
+    for thres in np.linspace(0, 1, 101):
+        F1 = metrics.f1_score(listTrue, (listProbs>thres).astype(int), average="weighted", sample_weight=listWeights)
+        acc = metrics.accuracy_score(listTrue, (listProbs>thres).astype(int), sample_weight=listWeights)
+        if F1 > tabMetricsAll[label]["F1"]:
+            tabMetricsAll[label]["F1"] = F1
+        if acc > tabMetricsAll[label]["Acc"]:
+            tabMetricsAll[label]["Acc"] = acc
+
+    k = 1  # Si k=1, sklearn considère les 0 et 1 comme des classes, mais de fait on prédit jamais 0 dans un P@k...
+    topk = np.argpartition(listProbs, -k, axis=1)[:, -k:]
+    trueTopK = np.array([listTrue[i][topk[i]] for i in range(len(listTrue))])
+    probsTopK = np.array([np.ones((len(topk[i]))) for i in range(len(listProbs))])
+    if k>=2:
+        tabMetricsAll[label][f"P@{k}"] = metrics.precision_score(trueTopK, probsTopK, average="weighted", sample_weight=listWeights)
+    else:
+        tabMetricsAll[label][f"P@{k}"] = np.average(trueTopK, weights=listWeights, axis=0)[0]
+
+    tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
+    tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
+    tabMetricsAll[label]["RankAvgPrec"] = metrics.label_ranking_average_precision_score(listTrue, listProbs, sample_weight=listWeights)
+    c=metrics.coverage_error(listTrue, listProbs, sample_weight=listWeights)
+    tabMetricsAll[label]["CovErr"] = c-1
+    tabMetricsAll[label]["CovErrNorm"] = (c-1)/nbOut
+
+    print(tabMetricsAll[label])
+
+    return tabMetricsAll
+
+#// endregion
+
+
+folder = "MrBanks"
+features = [0, 1, 2, 3]
+DS = [1, 2, 1, 1]
+nbClusMod1 = nbClusMod2 = nbClusMod3 = [10, 10, 3, 3]
+nbInterpMod1 = [1, 2, 1, 1]
+nbInterpMod2 = [1, 1, 1, 1]
+nbInterpMod3 = [1, 1, 1, 1]
+
+'''
+folder = "Imdb"
+features = [2, 3]
+DS = [1, 1]
+nbClusMod1 = nbClusMod2 = nbClusMod3 = [10, 10]
+nbInterpMod1 = [1, 1]
+nbInterpMod2 = [1, 1]
+nbInterpMod3 = [1, 1]
+'''
+'''
+folder = "Drugs"
+features = [0, 1, 2, 3]
+DS = [3, 1, 1, 1]
+nbClusMod1 = nbClusMod2 = nbClusMod3 = [10, 5, 2, 5]
+nbInterpMod1 = [1, 1, 1, 1]
+nbInterpMod2 = [1, 1, 1, 1]
+nbInterpMod3 = [1, 1, 1, 1]
+'''
+
+final = False
+redoBL = False
+run=0
+
+
+try:
+    folder=sys.argv[1]
+    features = np.array(sys.argv[2].split(","), dtype=int)
+    DS=np.array(sys.argv[3].split(","), dtype=int)
+    nbInterpMod1=np.array(sys.argv[4].split(","), dtype=int)
+    nbInterpMod2=np.array(sys.argv[5].split(","), dtype=int)
+    nbInterpMod3 = np.array(sys.argv[6].split(","), dtype=int)
+    nbClusMod1=np.array(sys.argv[7].split(","), dtype=int)
+    nbClusMod2=np.array(sys.argv[8].split(","), dtype=int)
+    nbClusMod3 = np.array(sys.argv[9].split(","), dtype=int)
+    final = int(sys.argv[10])
+    redoBL = int(sys.argv[11])
+except Exception as e:
+    print(e)
+    pass
+
+
+print(folder)
+
+print("Compute BL :", redoBL)
+if redoBL:
+    import Baselines
+    Baselines.run(folder, DS, features, nbClusMod1, nbInterpMod1)
+
+print("Import params")
+alpha_Tr, alpha_Te = recoverData(folder, DS)
+nbOut = alpha_Te.shape[-1]
+
+probsMod1, probsMod2, probsMod3 = 0., 0., 0.
+thetasMod1, pMod1, featToClusMod1, popFeatMod1 = recoverParams(folder, nbClusMod1, nbInterpMod1, final=final, run=run)
+thetasMod2, pMod2, featToClusMod2, popFeatMod2 = recoverParams(folder, nbClusMod2, nbInterpMod2, final=final, run=run)
+thetasMod3, pMod3, featToClusMod3, popFeatMod3 = recoverParams(folder, nbClusMod3, nbInterpMod3, final=final, run=run)
+
+tabThetas = [thetasMod1, thetasMod2, thetasMod3]
+tabP = [pMod1, pMod2, pMod3]
+tabFeatToClus = [featToClusMod1, featToClusMod2, featToClusMod3]
+tabNbInterp = [nbInterpMod1, nbInterpMod2, nbInterpMod3]
+
+
+print("Build probs")
+tabMetricsAll = {}
+listTrue, listProbMod1, listProbMod2, listProbMod3, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
+    buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, tabThetas, tabP, tabFeatToClus, tabNbInterp)
+
+print("Compute metrics")
+tabMetricsAll = scores(listTrue, listProbTF, listWeights, "TF", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbNMF, listWeights, "NMF", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbKNN, listWeights, "KNN", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbNB, listWeights, "NB", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbMod1, listWeights, "Mod1", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbMod2, listWeights, "Mod2", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbMod3, listWeights, "Mod3", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbBL, listWeights, "BL", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbPF, listWeights, "PF", tabMetricsAll, nbOut)
+tabMetricsAll = scores(listTrue, listProbRand, listWeights, "Rand", tabMetricsAll, nbOut)
+print("\n\n")
+saveResults(tabMetricsAll, folder, DS, printRes=True, final=final)
+
+
+#naTe = normalized(alpha_Te)
+#calib = np.mean(np.abs(probs.data-naTe.data))
+
+
+pause()
+
+
+
+
+
+
