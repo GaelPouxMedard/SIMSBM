@@ -12,7 +12,7 @@ def normalized(a):
     nnz = list(zip(*a.nonzero()[:-1]))
     lg=len(nnz)
     for ind, c in enumerate(nnz):
-        if ind%(lg/10)==0: print("Normalization", ind*100./lg, "%")
+        if ind%(lg//10)==0: print("Normalization", ind*100./lg, "%")
 
         if c not in dicMax: dicMax[c] = np.sum(a[c])
 

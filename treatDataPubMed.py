@@ -166,7 +166,7 @@ def read_pmids_tsv(path, key, min_articles=5):
 
 def saveData(folder, outcome, features):
 
-    thres = 2000
+    thres = 5000
 
     vals = [item for sublist in list(features[0].values()) for item in sublist]
 

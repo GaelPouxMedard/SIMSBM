@@ -17,10 +17,10 @@ def getData(folder, featuresData, lim):
     listOuts = set()
     ind=0
     lg=10
-    #lg = open(folderName + "/outcome.txt", "r", encoding="utf-8").read().count("\n")
+    lg = open(folderName + "/outcome.txt", "r", encoding="utf-8").read().count("\n")
     with open(folderName + "/outcome.txt", "r", encoding="utf-8") as f:
         for j, line in enumerate(f):
-            if j%1000==0:
+            if j%(lg//10)==0:
                 print("Outcomes:", j*100/lg, "%")
             num, out = line.replace("\n", "").split("\t")
             num = int(num)
@@ -43,10 +43,10 @@ def getData(folder, featuresData, lim):
         listFeatures.append(set())
         ind=0
         lg=10
-        #lg = open(folderName + "/feature_%.0f.txt" %i, "r", encoding="utf-8").read().count("\n")
+        lg = open(folderName + "/feature_%.0f.txt" %i, "r", encoding="utf-8").read().count("\n")
         with open(folderName + "/feature_%.0f.txt" % featuresData[i], "r", encoding="utf-8") as f:
             for j, line in enumerate(f):
-                if j%1000==0:
+                if j%(lg//10)==0:
                     print(f"Features {featuresData[i]}:", j*100/lg, "%")
                 try:
                     num, feat = line.replace("\n", "").split("\t")
@@ -81,10 +81,11 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
     IDsTest = set(IDs)-set(IDsTraining)
     # ================================ ALPHA TRAINING
     dicAlpha = {}
+    keysSeen = set()
 
     lgIDs = len(IDsTraining)
     for iter, num in enumerate(IDsTraining):
-        if iter%1000==0:
+        if iter%(lgIDs//10)==0:
             print("Alpha training :", iter*100./lgIDs, "%")
 
         """
@@ -106,6 +107,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
         for ktup in listKeys:
             k = sum(ktup, ())
             if k not in dicAlpha: dicAlpha[k] = 0
+            keysSeen.add(k)
             dicAlpha[k] += 1
 
     nnz = np.array(list(dicAlpha.keys()))
@@ -143,7 +145,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
     lgIDs = len(IDsTest)
     for iter, num in enumerate(IDsTest):
-        if iter%1000==0:
+        if iter%(lgIDs//10)==0:
             print("Alpha test :", iter*100./lgIDs, "%")
 
         """
@@ -164,8 +166,9 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
         for ktup in listKeys:
             k = sum(ktup, ())
-            if k not in dicAlpha: dicAlpha[k] = 0
-            dicAlpha[k] += 1
+            if k in keysSeen:
+                if k not in dicAlpha: dicAlpha[k] = 0
+                dicAlpha[k] += 1
 
     '''  # Pour éviter d'avoir un nouvel élément dans alphaTe
     nnz = np.array(list(dicAlpha.keys()))
@@ -183,10 +186,11 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
     alphaTe = sparse.COO(list(zip(*dicAlpha.keys())), list(dicAlpha.values()), shape=shape)
 
     # Symmetry alphaTe
+    print("Enforcing symmetry")
     prev = 0
     for num, i in enumerate(nbInterp):
         permuts = list(itertools.permutations(list(range(prev, prev+int(i))), int(i)))
-        print(permuts)
+        #print(permuts)
         alphaTe2 = alphaTe.copy()
         for per in permuts[1:]:
             arrTot = np.array(list(range(len(alphaTe.shape))))
@@ -366,7 +370,6 @@ def reduceAlpha(seuil, alphaTr, alphaTe, nbInterp, featToInt, outToInt):
             pass
 
     return newAlphaTr, newAlphaTe, newNewFeatToInt, newNewOutToInt
-
 
 def run(folder, nbInterp, featuresData, propTrainingSet, lim=0, seuil=0):
     features, outcome, featToInt, outToInt = getData(folder, featuresData, lim)

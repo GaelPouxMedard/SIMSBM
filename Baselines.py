@@ -11,7 +11,7 @@ def normalized(a):
     nnz = list(zip(*a.nonzero()[:-1]))
     lg=len(nnz)
     for ind, c in enumerate(nnz):
-        if ind%(lg/10)==0: print("Normalization", ind*100./lg, "%")
+        if ind%(lg//10)==0: print("Normalization", ind*100./lg, "%")
 
         if c not in dicMax: dicMax[c] = np.sum(a[c])
 
@@ -82,7 +82,7 @@ def getDataTr(folder, featuresData, DS, lim=1e20):
             num, out = line.replace("\n", "").split("\t")
             num = int(num)
             if num not in IDsTr: continue
-            if j%(lg/10)==0: print("Outcomes:", j*100/lg, "%")
+            if j%(lg//10)==0: print("Outcomes:", j*100/lg, "%")
             j+=1
             if j==len(IDsTr): break
             out = out.split(" ")
@@ -108,7 +108,7 @@ def getDataTr(folder, featuresData, DS, lim=1e20):
                 num, feat = line.replace("\n", "").split("\t")
                 num = int(num)
                 if num not in IDsTr: continue
-                if j%(lg/10)==0: print(f"Features {featuresData[i]}:", j*100/lg, "%")
+                if j%(lg//10)==0: print(f"Features {featuresData[i]}:", j*100/lg, "%")
                 j+=1
                 if j==len(IDsTr): break
                 feat = feat.split(" ")

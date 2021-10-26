@@ -634,6 +634,7 @@ buildData = False
 
 seuil=0  # If retreatEverything=True : choose the threshold for the number of apparitions of an entity.
 # If an entity appears less than "seuil" times, it's not included in the dataset
+thres = 0  # Set the minimal number of observations for each n-plet in Alpha
 
 '''
 nbFeat = 2
@@ -653,7 +654,7 @@ alpha_Tr, alpha_Te, thetasSynth, pSynth = getSynthData(featToClus, nbOutputs, po
 '''
 
 
-folder = "MrBanks"
+folder = "PubMed"
 
 lim = -1
 if "PubMed" in folder:
@@ -662,6 +663,7 @@ if "PubMed" in folder:
     nbInterp = [1]
     nbClus = [20]
     buildData = False
+    thres = 100
 if "Spotify" in folder:
     features = [0]
     DS = [3]
@@ -691,8 +693,8 @@ if "Drugs" in folder:
 if "MrBanks" in folder:
     # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key
     features = [0, 1, 2, 3]
-    DS = [1, 1, 1, 1]
-    nbInterp = [1, 1, 1, 1]
+    DS = [1, 3, 1, 1]
+    nbInterp = [1, 3, 1, 1]
     nbClus = [10, 10, 3, 3]
     buildData = True
 
@@ -718,7 +720,6 @@ if buildData:
     print("Build alphas")
     import BuildAlpha
     alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
-    print(alpha_Tr.shape)
 else:
     print("Get alphas")
     codeSave = ""
@@ -729,7 +730,12 @@ else:
     fname = "Data/"+folder+"/"+codeSave
     alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
 
-print(alpha_Tr)
+print("Number of different observations (before thres):", len(alpha_Tr.data), alpha_Tr)
+mask = alpha_Tr.data>thres
+alpha_Tr = sparse.COO([a[mask] for a in alpha_Tr.coords], alpha_Tr.data[mask])
+print("Number of different observations (after thres):", len(alpha_Tr.data), alpha_Tr)
+
+
 
 toRem, ind = [], 0
 for i in range(len(DS)):
