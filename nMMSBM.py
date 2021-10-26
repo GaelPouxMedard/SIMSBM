@@ -722,7 +722,7 @@ if "PubMed" in folder:
     DS = [3]
     nbInterp = [3]
     nbClus = [20]
-    buildData = False
+    buildData = True
     seuil = 500
 if "Spotify" in folder:
     features = [0]
