@@ -15,8 +15,18 @@ with profiler:
 profiler.print_stats()
 profiler.dump_stats("Benchmark.txt")
 pause()
+'''
 
 '''
+from memory_profiler import profile
+import gc
+fp = open("memory_profiler_Norm.log", "a")
+@profile(stream=fp, precision=5)
+'''
+
+
+from memory_profiler import profile
+fp = open("memory_profiler_Norm.log", "w+")
 
 seed = 111
 np.random.seed(seed)
@@ -298,6 +308,57 @@ def getAllProbs(dic, vals, prob, thetas, featToClus, feat, nbFeat):
 
     return vals
 
+def prod(a):
+    x = 1
+    for a_i in a:
+        x *= a_i
+    return x
+
+# EM steps for p
+def maximization_p(alpha, featToClus, popFeat, nbClus, theta, pPrev, divrm):
+    nbFeat = len(featToClus)
+
+    if sparseMatrices:
+
+        terme1 = alpha / (divrm + 1e-20)  # f1 f2 g r
+        for t in range(nbFeat):
+            sizeAfterOperation = prod(terme1.shape)*theta[featToClus[nbFeat - t - 1]].shape[1]*8/terme1.shape[-2]
+            #print(terme1.shape, sizeAfterOperation < 2e9)
+            if sizeAfterOperation < 2e9:  # As soon as we can use non-sparse we do it (1Gb)
+                #print("P dense")
+                tet = theta[featToClus[nbFeat - t - 1]].T  # K f1
+                terme1 = np.dot(tet, terme1)
+            else:
+                #print("P sparse")
+                tet = sparse.COO(theta[featToClus[nbFeat - t - 1]].T)  # K f1
+                terme1 = sparse.COO(np.dot(tet, terme1))
+
+
+        # print(terme1.shape)  # K1 K2 L r
+        if prod(terme1.shape)*8 < 2e9 and type(terme1) is not type(np.array([])):
+            terme1 = terme1.todense()
+
+        grandDiv = np.sum(pPrev*terme1, -1)
+        grandDiv = np.expand_dims(grandDiv, -1)
+        p = pPrev*terme1 / (grandDiv+1e-20)
+
+    else:
+        divrm = pPrev
+        for i in range(nbFeat):
+            divrm = theta[featToClus[nbFeat - i - 1]].dot(divrm)
+
+        terme1 = alpha / (divrm+1e-20)  # f1 f2 g r
+        for t in range(nbFeat):
+            terme1 = theta[featToClus[nbFeat - t - 1]].T.dot(terme1)
+
+        #print(terme1.shape)  # K1 K2 L r
+
+        grandDiv = np.sum(terme1, axis=-1)
+        grandDiv = np.expand_dims(grandDiv, -1)
+        p = terme1/grandDiv
+
+    return p
+
 # EM steps for theta
 def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, coeffBin, divrm):
     nbFeat = len(featToClus)
@@ -324,6 +385,34 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
         if len(arrFeat) == 0:
             continue
 
+        prob2 = np.moveaxis(p, arrFeat, range(len(arrFeat)))
+        for t in range(nbFeat):
+            if nbFeat - t - 1 not in arrFeat:
+                prob2 = thetaPrev[featToClus[nbFeat - t - 1]].dot(prob2)
+
+        otherArr = None
+        for feat2 in range(len(arrFeat)):  # f2 g r K1
+            if feat2!=0:
+                if otherArr is None:
+                    otherArr = thetaPrev[i]
+                else:
+                    sizeAfterOperation = prod(otherArr.shape)*prod(thetaPrev[i].shape)*8
+                    if sizeAfterOperation < 2e9:
+                        print("dense")
+                        otherArr = np.tensordot(otherArr, thetaPrev[i], axes=0)
+                    else:
+                        print("sparse")
+                        otherArr = sparse.tensordot(otherArr, thetaPrev[i], axes=0)
+
+        if otherArr is not None:
+            inds = [i for i in range(len(otherArr.shape)) if i%2==1]
+
+            prob2 = np.tensordot(otherArr, prob2, axes = (inds, -len(arrFeat)+np.array(arrFeat[:-1])-1))
+
+        prob = sparse.moveaxis(prob2, -1, -2)
+
+        ''' Old/Understandable way
+        # === 2 ===
         prob = np.moveaxis(p, arrFeat, range(len(arrFeat)))
         for t in range(nbFeat):
             if nbFeat - t - 1 not in arrFeat:
@@ -334,17 +423,31 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
         for feat2 in range(len(arrFeat)):  # f2 g r K1
             if feat2!=0:
                 #probOld = thetaPrev[i].dot(np.moveaxis(prob, -len(arrFeat)+feat2, -2))
-                try:
+                sizeAfterOperation = prod(prob.shape)*thetaPrev[i].shape[0]*8/prob.shape[-len(arrFeat)+feat2]
+                print(prob.shape, sizeAfterOperation < 2e9)
+                if sizeAfterOperation < 2e9:
+                    print("T dense")
                     prob = np.tensordot(thetaPrev[i], np.moveaxis(prob, -len(arrFeat)+feat2, 0), axes=1)
-                except:
-                    try:
+                else:
+                    print("T sparse")
+                    if sizeAfterOperation < 2e9:
                         prob = thetaPrev[i].dot(np.moveaxis(prob, -len(arrFeat) + feat2, -2))
-                    except:
+                    else:
+                        print("Tenosor1")
                         prob = sparse.tensordot(thetaPrev[i], sparse.moveaxis(sparse.COO(prob), -len(arrFeat) + feat2, 0), axes=1)
+                        print("Tenosor2")
+
+
+
+        print(prob2.shape, prob.shape)
+        d = prob2 - prob
+        print("==================================", d[d>1e-5])
+        '''
 
         b = sparse.moveaxis(terme1*coeffBin[i], arrFeat, range(len(arrFeat)))  # f1 f2 g r
 
-        temp = np.tensordot(b, prob, axes=b.ndim - 1)  # f1 K1
+
+        temp = sparse.tensordot(b, prob, axes=b.ndim - 1)  # f1 K1
 
         thetas[i] += temp*len(arrFeat)  # En fait si on le fait n fois pour n interactions on aura tjrs le meme resultat
 
@@ -352,48 +455,6 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
         thetas[i] *= thetaPrev[i]
 
     return thetas
-
-# EM steps for p
-def maximization_p(alpha, featToClus, popFeat, nbClus, theta, pPrev, divrm):
-    nbFeat = len(featToClus)
-
-    if sparseMatrices:
-
-        terme1 = alpha / (divrm + 1e-20)  # f1 f2 g r
-        for t in range(nbFeat):
-            try:  # As soon as we can use non-sparse we do it
-                tet = theta[featToClus[nbFeat - t - 1]].T  # K f1
-                terme1 = np.dot(tet, terme1)
-            except:
-                tet = sparse.COO(theta[featToClus[nbFeat - t - 1]].T)  # K f1
-                terme1 = sparse.COO(np.dot(tet, terme1))
-
-
-        # print(terme1.shape)  # K1 K2 L r
-        try:
-            terme1 = terme1.todense()
-        except:
-            pass
-        grandDiv = np.sum(pPrev*terme1, -1)
-        grandDiv = np.expand_dims(grandDiv, -1)
-        p = pPrev*terme1 / (grandDiv+1e-20)
-
-    else:
-        divrm = pPrev
-        for i in range(nbFeat):
-            divrm = theta[featToClus[nbFeat - i - 1]].dot(divrm)
-
-        terme1 = alpha / (divrm+1e-20)  # f1 f2 g r
-        for t in range(nbFeat):
-            terme1 = theta[featToClus[nbFeat - t - 1]].T.dot(terme1)
-
-        #print(terme1.shape)  # K1 K2 L r
-
-        grandDiv = np.sum(terme1, axis=-1)
-        grandDiv = np.expand_dims(grandDiv, -1)
-        p = terme1/grandDiv
-
-    return p
 
 # Reduce number of clusters
 def distClus(K1, K2):
@@ -632,9 +693,8 @@ nbInterp = [2]  # How many interactions consider for each dataset (reduces DS to
 nbClus = [20]
 buildData = False
 
-seuil=0  # If retreatEverything=True : choose the threshold for the number of apparitions of an entity.
-# If an entity appears less than "seuil" times, it's not included in the dataset
-thres = 0  # Set the minimal number of observations for each n-plet in Alpha
+seuil=0  # If retreatEverything=True : choose the threshold for the number of apparitions of an nplet.
+# If an nplet appears less than "seuil" times, it's not included in the dataset
 
 '''
 nbFeat = 2
@@ -660,10 +720,10 @@ lim = -1
 if "PubMed" in folder:
     features = [0]
     DS = [3]
-    nbInterp = [1]
+    nbInterp = [3]
     nbClus = [20]
     buildData = False
-    thres = 100
+    seuil = 500
 if "Spotify" in folder:
     features = [0]
     DS = [3]
@@ -696,7 +756,7 @@ if "MrBanks" in folder:
     DS = [1, 3, 1, 1]
     nbInterp = [1, 3, 1, 1]
     nbClus = [10, 10, 3, 3]
-    buildData = True
+    buildData = False
 
 import sys
 try:
@@ -731,7 +791,7 @@ else:
     alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
 
 print("Number of different observations (before thres):", len(alpha_Tr.data), alpha_Tr)
-mask = alpha_Tr.data>thres
+mask = alpha_Tr.data>seuil
 alpha_Tr = sparse.COO([a[mask] for a in alpha_Tr.coords], alpha_Tr.data[mask])
 print("Number of different observations (after thres):", len(alpha_Tr.data), alpha_Tr)
 

@@ -127,14 +127,14 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
     # Symmetry alphaTr
     prev = 0
-    print(nbInterp)
+    print("Enforcing symmetry", nbInterp)
     for num, i in enumerate(nbInterp):
         permuts = list(itertools.permutations(list(range(prev, prev+int(i))), int(i)))
         alphaTr2 = alphaTr.copy()
         for per in permuts[1:]:
             arrTot = np.array(list(range(len(alphaTr.shape))))
             arrTot[prev:prev+i] = np.array(per)
-            print(arrTot)
+            #print(arrTot)
             alphaTr2 = alphaTr2 + alphaTr.transpose(arrTot)
         alphaTr = alphaTr2 / len(permuts)  # somme permutations = 1 obs
         prev += i
@@ -257,7 +257,7 @@ def reduceAlpha(seuil, alphaTr, alphaTe, nbInterp, featToInt, outToInt):
     data = alphaTr.data
     lg = len(data)
     for j, c in enumerate(zip(*nnzAtr)):
-        if j%1000==0:
+        if j%(lg//10)==0:
             print("Compress ATr", j*100./lg, "%")
         vn = 0
         vf = -1
@@ -376,6 +376,7 @@ def run(folder, nbInterp, featuresData, propTrainingSet, lim=0, seuil=0):
     alphaTr, alphaTe, IDsTraining, IDsTest = getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet)
     print("Original shape :", alphaTr.shape)
     alphaTr, alphaTe, featToInt, outToInt = reduceAlpha(seuil, alphaTr, alphaTe, nbInterp, featToInt, outToInt)
+    print("Final shape :", alphaTr.shape)
     saveData(alphaTr, alphaTe, folder, nbInterp, featToInt, outToInt, IDsTraining, IDsTest, featuresData)
 
     return alphaTr, alphaTe
