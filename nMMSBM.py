@@ -782,9 +782,9 @@ else:  # EXPERIMENTAL SETUP
         if "Dota" in folder:
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
-            list_params.append(([0, 1], [2, 2], [1, 1], [10, 10], True, 0))
-            list_params.append(([0, 1], [2, 2], [2, 2], [10, 10], False, 0))
-            # list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 10))  # Trop gros...
+            list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], True, 0))
+            list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 0))
+            list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 0))
         if "Imdb" in folder:
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
             list_params = []
