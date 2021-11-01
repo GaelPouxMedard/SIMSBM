@@ -776,9 +776,9 @@ else:  # EXPERIMENTAL SETUP
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
             list_params = []
-            list_params.append(([0], [3], [1], [20], True, 0))
-            list_params.append(([0], [3], [2], [20], False, 0))
-            list_params.append(([0], [3], [3], [20], False, 0))
+            list_params.append(([0], [3], [1], [20], True, 2))
+            list_params.append(([0], [3], [2], [20], False, 2))
+            list_params.append(([0], [3], [3], [20], False, 2))
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
