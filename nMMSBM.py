@@ -6,6 +6,7 @@ import datetime
 from copy import deepcopy as copy
 from scipy.special import binom
 import time
+import sys
 
 '''
 import pprofile
@@ -554,7 +555,7 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec
     nbFeat = len(featToClus)
     thetas, p = initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus)
     maskedProbs = getAllProbs(dicnnz, [], np.moveaxis(p, -1, 0), thetas, featToClus, 0, nbFeat)
-    divrm = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha_Tr.shape)
+    divrm = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha.shape)
     maxThetas, maxP = initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus)
     prevL, L, maxL = -1e20, 0.1, -1e20
     cnt = 0
@@ -598,7 +599,7 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec
 
         #divrm = getDivrm(alpha, thetas, p, featToClus)
         maskedProbs = getAllProbs(dicnnz, [], np.moveaxis(p, -1, 0), thetas, featToClus, 0, nbFeat)
-        divrm = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha_Tr.shape)
+        divrm = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha.shape)
 
         pNew = maximization_p(alpha, featToClus, popFeat, nbClus, thetas, p, divrm)
         thetasNew = maximization_Theta(alpha, featToClus, popFeat, nbClus, thetas, p, phim, coeffBin, divrm)
@@ -693,7 +694,7 @@ nbClus = []
 buildData = bool
 
 seuil=0  # If retreatEverything=True : choose the threshold for the number of apparitions of an nplet.
-# If an nplet appears less than "seuil" times, it's not included in the dataset
+# If an nplet appears stricly less than "seuil" times, it's not included in the dataset
 
 
 folder = "PubMed"
@@ -741,8 +742,7 @@ if "MrBanks" in folder:
     nbClus = [10, 10, 3, 3]
     buildData = False
 
-import sys
-if False:  # If we want to specify precisely what to do
+if False:  # If we want to specify precisely what to do ; UI
     try:
         folder=sys.argv[1]
         features = np.array(sys.argv[2].split(","), dtype=int)
@@ -757,7 +757,8 @@ if False:  # If we want to specify precisely what to do
 
 else:  # If we want to run several XP on one dataset
     try:
-        folder=sys.argv[1].lower()
+        #folder=sys.argv[1].lower()
+        folder = "Dota"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "PubMed" in folder:
             # 0 = symptoms  ;  o = disease
@@ -768,15 +769,15 @@ else:  # If we want to run several XP on one dataset
         if "Spotify" in folder:
             # 0 = artists  ;  o = next artist
             list_params = []
-            list_params.append(([0], [3], [1], [20], True, 0))
-            list_params.append(([0], [3], [2], [20], False, 0))
-            list_params.append(([0], [3], [3], [20], False, 0))
+            list_params.append(([0], [3], [1], [20], True, 6))
+            list_params.append(([0], [3], [2], [20], False, 6))
+            list_params.append(([0], [3], [3], [20], False, 6))
         if "Dota" in folder:
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
-            list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], True, 0))
-            list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 0))
-            list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 0))
+            list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], True, 10))
+            list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 10))
+            list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 10))
         if "Imdb" in folder:
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
             list_params = []
@@ -822,7 +823,6 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
     print("Features", features)
     print("DS", DS)
 
-
     if buildData:
         print("Build alphas")
         import BuildAlpha
@@ -863,12 +863,12 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
 
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt,
-                reductionK, sparseMatrices)
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices)
 
 
 
-sys.exit()
+sys.exit(0)
+
 runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices)
 
 import pprofile
