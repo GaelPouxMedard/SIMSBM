@@ -755,9 +755,16 @@ if False:  # If we want to specify precisely what to do ; UI
         print(e)
         pass
 
-else:  # If we want to run several XP on one dataset
+else:  # EXPERIMENTAL SETUP
     try:
         #folder=sys.argv[1].lower()
+        prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
+        maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
+        saveToFile = True
+        propTrainingSet = 0.9
+        nbRuns = 10
+        reductionK = True
+        lim = -1
         folder = "MrBanks"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "PubMed" in folder:
@@ -775,8 +782,8 @@ else:  # If we want to run several XP on one dataset
         if "Dota" in folder:
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
-            list_params.append(([0, 1], [2, 2], [1, 1], [10, 10], True, 10))
-            list_params.append(([0, 1], [2, 2], [2, 2], [10, 10], False, 10))
+            list_params.append(([0, 1], [2, 2], [1, 1], [10, 10], True, 0))
+            list_params.append(([0, 1], [2, 2], [2, 2], [10, 10], False, 0))
             # list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 10))  # Trop gros...
         if "Imdb" in folder:
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
