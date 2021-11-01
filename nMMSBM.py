@@ -835,8 +835,6 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
         print("Build alphas")
         import BuildAlpha
         alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
-        if onlyBuildDS:
-            return 0
     else:
         print("Get alphas")
         codeSave = ""
@@ -847,6 +845,8 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
         fname = "Data/"+folder+"/"+codeSave
         alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
 
+    if onlyBuildDS:
+        return 0
     print("Alpha:", len(alpha_Tr.data), alpha_Tr)
 
 
