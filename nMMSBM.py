@@ -765,7 +765,7 @@ else:  # EXPERIMENTAL SETUP
         nbRuns = 10
         reductionK = True
         lim = -1
-        folder = "MrBanks"
+        folder = "Dota"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "PubMed" in folder:
             # 0 = symptoms  ;  o = disease
