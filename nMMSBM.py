@@ -398,10 +398,8 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
                 else:
                     sizeAfterOperation = prod(otherArr.shape)*prod(thetaPrev[i].shape)*8
                     if sizeAfterOperation < 2e9:
-                        print("dense")
                         otherArr = np.tensordot(otherArr, thetaPrev[i], axes=0)
                     else:
-                        print("sparse")
                         otherArr = sparse.tensordot(otherArr, thetaPrev[i], axes=0)
 
         if otherArr is not None:
@@ -683,41 +681,24 @@ prec = 1e-4  # Stopping threshold : when relative variation of the likelihood ov
 maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
 saveToFile = True
 propTrainingSet = 0.9
-nbRuns = 100
+nbRuns = 10
 reductionK = True
+lim = -1
 
 # Juste pour que ce soit défini
-features = [0]  # Which features to consider (see key)
-DS = [3]  # Which dataset use (some are already built for interactions)
-nbInterp = [2]  # How many interactions consider for each dataset (reduces DS to this number by summing)
-nbClus = [20]
-buildData = False
+features = []  # Which features to consider (see key)
+DS = []  # Which dataset use (some are already built for interactions)
+nbInterp = []  # How many interactions consider for each dataset (reduces DS to this number by summing)
+nbClus = []
+buildData = bool
 
 seuil=0  # If retreatEverything=True : choose the threshold for the number of apparitions of an nplet.
 # If an nplet appears less than "seuil" times, it's not included in the dataset
 
-'''
-nbFeat = 2
-nbOutputs = 100
-nbClus = [5]
-
-featToClus = np.zeros((nbFeat), dtype=int)
-popFeat = np.zeros((nbFeat), dtype=int)
-
-featToClus[0] = featToClus[1] = 0
-#featToClus[2] = featToClus[3] = 1
-popFeat[0] = popFeat[1] = 200
-#popFeat[2] = popFeat[3] = 4
-nbLayers=len(nbClus)
-
-alpha_Tr, alpha_Te, thetasSynth, pSynth = getSynthData(featToClus, nbOutputs, popFeat, nbClus)
-'''
-
 
 folder = "PubMed"
-
-lim = -1
 if "PubMed" in folder:
+    # 0 = symptoms  ;  o = disease
     features = [0]
     DS = [3]
     nbInterp = [3]
@@ -725,33 +706,35 @@ if "PubMed" in folder:
     buildData = True
     seuil = 500
 if "Spotify" in folder:
+    # 0 = artists  ;  o = next artist
     features = [0]
     DS = [3]
     nbInterp = [1]
     nbClus = [20]
     buildData = False
 if "Dota" in folder:
+    # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
     features = [0, 1]
     DS = [1, 1]
     nbInterp = [1, 1]
     nbClus = [10, 10]
     buildData = True
 if "Imdb" in folder:
-    # 0 = movie, 1 = user, 2 = director, 3 = cast
+    # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
     features = [2, 3]
     DS = [1, 2]
     nbInterp = [1, 1]
     nbClus = [10, 10]
     buildData = False
 if "Drugs" in folder:
-    # 0 = drugs, 1 = age, 2 = gender, 3 = education
+    # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
     features = [0, 1]
     DS = [3, 1]
     nbInterp = [1, 1]
     nbClus = [4, 4]
     buildData = True
 if "MrBanks" in folder:
-    # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key
+    # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
     features = [0, 1, 2, 3]
     DS = [1, 3, 1, 1]
     nbInterp = [1, 3, 1, 1]
@@ -759,66 +742,134 @@ if "MrBanks" in folder:
     buildData = False
 
 import sys
-try:
-    folder=sys.argv[1]
-    features = np.array(sys.argv[2].split(","), dtype=int)
-    DS=np.array(sys.argv[3].split(","), dtype=int)
-    nbInterp=np.array(sys.argv[4].split(","), dtype=int)
-    nbClus=np.array(sys.argv[5].split(","), dtype=int)
-    buildData = bool(int(sys.argv[6]))
-    reductionK = bool(int(sys.argv[7]))
-except Exception as e:
-    print(e)
-    pass
-
-print("RedK", reductionK)
-print("Features", features)
-print("DS", DS)
-
-
-if buildData:
-    print("Build alphas")
-    import BuildAlpha
-    alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
-else:
-    print("Get alphas")
-    codeSave = ""
-    for i in range(len(DS)):
-        for j in range(DS[i]):
-            codeSave += str(i) + "-"
-    codeSave = codeSave[:-1]
-    fname = "Data/"+folder+"/"+codeSave
-    alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
-
-print("Number of different observations (before thres):", len(alpha_Tr.data), alpha_Tr)
-mask = alpha_Tr.data>seuil
-alpha_Tr = sparse.COO([a[mask] for a in alpha_Tr.coords], alpha_Tr.data[mask])
-print("Number of different observations (after thres):", len(alpha_Tr.data), alpha_Tr)
-
-
-
-toRem, ind = [], 0
-for i in range(len(DS)):
-    if DS[i] != nbInterp[i]:
-        for t in range(ind, ind+DS[i]-nbInterp[i]):
-            toRem.append(t)
-    ind += DS[i]
-if len(toRem)!=0:
-    alpha_Tr = alpha_Tr.sum(toRem)
-    alpha_Te = alpha_Te.sum(toRem)
-
-if not sparseMatrices:
+if False:  # If we want to specify precisely what to do
     try:
-        alpha_Tr=alpha_Tr.todense()
-        alpha_Te=alpha_Te.todense()
-    except:
-        sparseMatrices=True
-        print("=============== SWITCH TO SPARSE =================")
+        folder=sys.argv[1]
+        features = np.array(sys.argv[2].split(","), dtype=int)
+        DS=np.array(sys.argv[3].split(","), dtype=int)
+        nbInterp=np.array(sys.argv[4].split(","), dtype=int)
+        nbClus=np.array(sys.argv[5].split(","), dtype=int)
+        buildData = bool(int(sys.argv[6]))
+        reductionK = bool(int(sys.argv[7]))
+    except Exception as e:
+        print(e)
+        pass
 
-runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK)
-pause()
+else:  # If we want to run several XP on one dataset
+    try:
+        folder=sys.argv[1].lower()
+        # Features, DS, nbInterp, nbClus, buildData, seuil
+        if "PubMed" in folder:
+            # 0 = symptoms  ;  o = disease
+            list_params = []
+            list_params.append(([0], [3], [1], [20], True, 500))
+            list_params.append(([0], [3], [2], [20], False, 500))
+            list_params.append(([0], [3], [3], [20], False, 500))
+        if "Spotify" in folder:
+            # 0 = artists  ;  o = next artist
+            list_params = []
+            list_params.append(([0], [3], [1], [20], True, 0))
+            list_params.append(([0], [3], [2], [20], False, 0))
+            list_params.append(([0], [3], [3], [20], False, 0))
+        if "Dota" in folder:
+            # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
+            list_params = []
+            list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], True, 0))
+            list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 0))
+            list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 0))
+        if "Imdb" in folder:
+            # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
+            list_params = []
+            list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], True, 0))  # Antonia
+
+            list_params.append(([2, 3], [1, 2], [1, 1], [10, 10], True, 0))
+            list_params.append(([2, 3], [1, 2], [1, 2], [10, 10], False, 0))
+
+            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], True, 0))
+            list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
+
+            list_params.append(([1, 2, 3], [1, 1, 2], [1, 1, 1], [10, 10, 10], True, 0))
+            list_params.append(([1, 2, 3], [1, 1, 2], [1, 1, 2], [10, 10, 10], True, 0))
+        if "Drugs" in folder:
+            # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
+            list_params = []
+            list_params.append(([0], [3], [1], [10], True, 0))
+
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [10, 3, 3, 5], True, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [10, 3, 3, 5], False, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [10, 3, 3, 5], False, 0))
+
+            list_params.append(([0, 3], [3, 1], [1, 1], [10, 5], True, 0))
+            list_params.append(([0, 3], [3, 1], [2, 1], [10, 5], False, 0))
+            list_params.append(([0, 3], [3, 1], [3, 1], [10, 5], False, 0))
+        if "MrBanks" in folder:
+            # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
+            list_params = []
+            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 1, 1, 1], [5, 5, 3, 3], True, 0))
+            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
+            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
+
+            list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], True, 0))
+            list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
+            list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
+    except Exception as e:
+        print(e)
+        pass
 
 
+def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices):
+    print("Reduction K", reductionK)
+    print("Features", features)
+    print("DS", DS)
+
+
+    if buildData:
+        print("Build alphas")
+        import BuildAlpha
+        alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
+    else:
+        print("Get alphas")
+        codeSave = ""
+        for i in range(len(DS)):
+            for j in range(DS[i]):
+                codeSave += str(i) + "-"
+        codeSave = codeSave[:-1]
+        fname = "Data/"+folder+"/"+codeSave
+        alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
+
+    print("Alpha:", len(alpha_Tr.data), alpha_Tr)
+
+
+
+    toRem, ind = [], 0
+    for i in range(len(DS)):
+        if DS[i] != nbInterp[i]:
+            for t in range(ind, ind+DS[i]-nbInterp[i]):
+                toRem.append(t)
+        ind += DS[i]
+    if len(toRem)!=0:
+        alpha_Tr = alpha_Tr.sum(toRem)
+        alpha_Te = alpha_Te.sum(toRem)
+
+    if not sparseMatrices:
+        try:
+            alpha_Tr=alpha_Tr.todense()
+            alpha_Te=alpha_Te.todense()
+        except:
+            sparseMatrices=True
+            print("=============== SWITCH TO SPARSE =================")
+
+    runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK)
+
+
+for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt,
+                reductionK, sparseMatrices)
+
+
+
+sys.exit()
+runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices)
 
 import pprofile
 profiler = pprofile.Profile()
