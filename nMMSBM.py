@@ -757,7 +757,7 @@ if False:  # If we want to specify precisely what to do ; UI
 
 else:  # EXPERIMENTAL SETUP
     try:
-        folder=sys.argv[1].lower()
+        folder=sys.argv[1]
         prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
         maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
         saveToFile = True
@@ -767,25 +767,25 @@ else:  # EXPERIMENTAL SETUP
         lim = -1
         # folder = "Dota"
         # Features, DS, nbInterp, nbClus, buildData, seuil
-        if "pubmed" in folder:
+        if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
             list_params = []
             list_params.append(([0], [3], [1], [20], True, 500))
             list_params.append(([0], [3], [2], [20], False, 500))
             list_params.append(([0], [3], [3], [20], False, 500))
-        if "spotify" in folder:
+        if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
             list_params = []
             list_params.append(([0], [3], [1], [20], True, 6))
             list_params.append(([0], [3], [2], [20], False, 6))
             list_params.append(([0], [3], [3], [20], False, 6))
-        if "dota" in folder:
+        if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
             list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], True, 0))
             list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 0))
             list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 0))
-        if "imdb" in folder:
+        if "imdb" in folder.lower():
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
             list_params = []
             list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], True, 0))  # Antonia
@@ -797,7 +797,7 @@ else:  # EXPERIMENTAL SETUP
 
             list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], True, 0))  # Maybe too large
             list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
-        if "drugs" in folder:
+        if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
             list_params = []
             list_params.append(([0], [3], [1], [10], True, 0))
@@ -811,7 +811,7 @@ else:  # EXPERIMENTAL SETUP
             list_params.append(([0, 3], [3, 1], [1, 1], [10, 5], True, 0))
             list_params.append(([0, 3], [3, 1], [2, 1], [10, 5], False, 0))
             list_params.append(([0, 3], [3, 1], [3, 1], [10, 5], False, 0))
-        if "mrbanks" in folder:
+        if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
             list_params = []
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 1, 1, 1], [5, 5, 3, 3], True, 0))
