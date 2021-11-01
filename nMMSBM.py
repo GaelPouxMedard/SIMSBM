@@ -826,7 +826,7 @@ else:  # EXPERIMENTAL SETUP
         pass
 
 
-def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices):
+def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False):
     print("Reduction K", reductionK)
     print("Features", features)
     print("DS", DS)
@@ -835,6 +835,8 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
         print("Build alphas")
         import BuildAlpha
         alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
+        if onlyBuildDS:
+            return 0
     else:
         print("Get alphas")
         codeSave = ""
@@ -871,7 +873,7 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
 
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices)
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True)
 
 
 
