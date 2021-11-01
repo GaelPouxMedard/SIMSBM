@@ -758,7 +758,7 @@ if False:  # If we want to specify precisely what to do ; UI
 else:  # If we want to run several XP on one dataset
     try:
         #folder=sys.argv[1].lower()
-        folder = "Dota"
+        folder = "MrBanks"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "PubMed" in folder:
             # 0 = symptoms  ;  o = disease
@@ -775,9 +775,9 @@ else:  # If we want to run several XP on one dataset
         if "Dota" in folder:
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
-            list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], True, 10))
-            list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 10))
-            list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 10))
+            list_params.append(([0, 1], [2, 2], [1, 1], [10, 10], True, 10))
+            list_params.append(([0, 1], [2, 2], [2, 2], [10, 10], False, 10))
+            # list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 10))  # Trop gros...
         if "Imdb" in folder:
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
             list_params = []
@@ -786,15 +786,16 @@ else:  # If we want to run several XP on one dataset
             list_params.append(([2, 3], [1, 2], [1, 1], [10, 10], True, 0))
             list_params.append(([2, 3], [1, 2], [1, 2], [10, 10], False, 0))
 
-            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], True, 0))
-            list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
+            list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], True, 0))
 
-            list_params.append(([1, 2, 3], [1, 1, 2], [1, 1, 1], [10, 10, 10], True, 0))
-            list_params.append(([1, 2, 3], [1, 1, 2], [1, 1, 2], [10, 10, 10], True, 0))
+            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], True, 0))  # Maybe too large
+            list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
         if "Drugs" in folder:
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
             list_params = []
             list_params.append(([0], [3], [1], [10], True, 0))
+            list_params.append(([0], [3], [2], [10], False, 0))
+            list_params.append(([0], [3], [3], [10], False, 0))
 
             list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [10, 3, 3, 5], True, 0))
             list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [10, 3, 3, 5], False, 0))
