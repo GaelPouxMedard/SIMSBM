@@ -551,7 +551,7 @@ def initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus):
     return thetas, p
 
 # Main loop of the EM algorithm, for 1 run
-def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec, alpha_Te, folder, run, phim, coeffBin, reductionK, dicnnz):
+def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec, alpha_Te, folder, run, phim, coeffBin, reductionK, dicnnz, nbInterp, features):
     nbFeat = len(featToClus)
     thetas, p = initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus)
     maskedProbs = getAllProbs(dicnnz, [], np.moveaxis(p, -1, 0), thetas, featToClus, 0, nbFeat)
@@ -568,7 +568,7 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec
         if i%10==0:  # Compute the likelihood and possibly save the results every 10 iterations
             #L = likelihood(thetas, p, alpha, featToClus)
             L = likelihood(alpha, divrm)
-            print("Run "+str(run)+" - Iter "+str(i)+" - L=" + str(L))
+            print(f"Run {run} - Iter {i} - Feat {features} - Interps {nbInterp} - L={L}")
 
             if ((L - prevL) / abs(L)) < prec:
                 cnt += i-iPrev
@@ -613,7 +613,7 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec
 
 #// endregion
 
-def runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK):
+def runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK, features):
     print(alpha_Tr.shape)
     nbFeat = alpha_Tr.ndim - 1
     nbOutputs = alpha_Tr.shape[-1]
@@ -663,7 +663,7 @@ def runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reduction
     maxL = -1e100
     for i in range(nbRuns):
         print("RUN", i)
-        theta, p, L, nbClusNew = EMLoop(alpha_Tr, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec, alpha_Te, folder, i, phim, coeffBin, reductionK, dicnnz)
+        theta, p, L, nbClusNew = EMLoop(alpha_Tr, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec, alpha_Te, folder, i, phim, coeffBin, reductionK, dicnnz, nbInterp, features)
         #HOL = likelihood(theta, p, alpha_Te, featToClus)
         HOL=0
         if L > maxL:
@@ -757,7 +757,7 @@ if False:  # If we want to specify precisely what to do ; UI
 
 else:  # EXPERIMENTAL SETUP
     try:
-        folder=sys.argv[1]
+        #folder=sys.argv[1]
         prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
         maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
         saveToFile = True
@@ -765,7 +765,7 @@ else:  # EXPERIMENTAL SETUP
         nbRuns = 10
         reductionK = True
         lim = -1
-        # folder = "Dota"
+        folder = "Spotify"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
@@ -829,6 +829,7 @@ else:  # EXPERIMENTAL SETUP
 def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False):
     print("Reduction K", reductionK)
     print("Features", features)
+    print("Structure", nbInterp)
     print("DS", DS)
 
     if buildData:
@@ -869,11 +870,11 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
             sparseMatrices=True
             print("=============== SWITCH TO SPARSE =================")
 
-    runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK)
+    runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK, features)
 
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True)
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False)
 
 
 
