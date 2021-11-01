@@ -9,6 +9,7 @@ import datetime
 from copy import deepcopy as copy
 from scipy.special import binom
 import time
+import itertools
 import sys
 
 '''
@@ -381,6 +382,7 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
     thetas = copy(thetaPrev)
     for i in range(len(thetas)):
         thetas[i]*=0
+
     for i in range(nbLayers):
         arrFeat = []
         for feat in range(len(featToClus)):
@@ -407,13 +409,13 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
                         otherArr = sparse.tensordot(otherArr, thetaPrev[i], axes=0)
 
         if otherArr is not None:
-            inds = [i for i in range(len(otherArr.shape)) if i%2==1]
-
-            prob2 = np.tensordot(otherArr, prob2, axes = (inds, -len(arrFeat)+np.array(arrFeat[:-1])-1))
+            inds = [k for k in range(len(otherArr.shape)) if k%2==1]
+            #print(otherArr.shape, prob2.shape, inds, -len(arrFeat)-1+np.array(list(range(len(inds)))), arrFeat)
+            prob2 = np.tensordot(otherArr, prob2, axes=(inds, -len(arrFeat)-1+np.array(list(range(len(inds))))))
 
         prob = sparse.moveaxis(prob2, -1, -2)
 
-        ''' Old/Understandable way
+        ''' # Old/Understandable way
         # === 2 ===
         prob = np.moveaxis(p, arrFeat, range(len(arrFeat)))
         for t in range(nbFeat):
@@ -426,28 +428,23 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
             if feat2!=0:
                 #probOld = thetaPrev[i].dot(np.moveaxis(prob, -len(arrFeat)+feat2, -2))
                 sizeAfterOperation = prod(prob.shape)*thetaPrev[i].shape[0]*8/prob.shape[-len(arrFeat)+feat2]
-                print(prob.shape, sizeAfterOperation < 2e9)
+                #print(prob.shape, sizeAfterOperation < 2e9)
                 if sizeAfterOperation < 2e9:
-                    print("T dense")
                     prob = np.tensordot(thetaPrev[i], np.moveaxis(prob, -len(arrFeat)+feat2, 0), axes=1)
                 else:
-                    print("T sparse")
                     if sizeAfterOperation < 2e9:
                         prob = thetaPrev[i].dot(np.moveaxis(prob, -len(arrFeat) + feat2, -2))
                     else:
-                        print("Tenosor1")
                         prob = sparse.tensordot(thetaPrev[i], sparse.moveaxis(sparse.COO(prob), -len(arrFeat) + feat2, 0), axes=1)
-                        print("Tenosor2")
 
 
 
         print(prob2.shape, prob.shape)
         d = prob2 - prob
-        print("==================================", d[d>1e-5])
+        print(f"============== {i} ====================", np.max(d), d[d>1e-5])
         '''
 
         b = sparse.moveaxis(terme1*coeffBin[i], arrFeat, range(len(arrFeat)))  # f1 f2 g r
-
 
         temp = sparse.tensordot(b, prob, axes=b.ndim - 1)  # f1 K1
 
@@ -534,20 +531,17 @@ def initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus):
     shape.append(nbOutputs)
     p = np.random.random(tuple(shape))  # K, K, L, O
 
-    for l in range(nbLayers):
-        indTemp = []
-        for i in range(len(featToClus)):
-            if featToClus[i]==l:
-                indTemp.append(i)
-
-        a = list(range(nbFeat+1))
-        for i in indTemp:
-            for j in indTemp:
-                aTemp = copy(a)
-                t = aTemp[i]
-                aTemp[i]=aTemp[j]
-                aTemp[j]=t
-                p = (p + np.transpose(p, aTemp))/2
+    # Important to make symmetric initialization, otherwise assumptions made in the algorithm do not hold.
+    prev = 0
+    for num, i in enumerate(nbInterp):
+        permuts = list(itertools.permutations(list(range(prev, prev+int(i))), int(i)))
+        p2 = p.copy()
+        for per in permuts[1:]:
+            arrTot = np.array(list(range(len(p.shape))))
+            arrTot[prev:prev+i] = np.array(per)
+            p2 = p2 + p.transpose(arrTot)
+        p = p2 / len(permuts)  # somme permutations = 1 obs
+        prev += i
 
     p = normalized(p, axis=-1)
 
@@ -760,7 +754,7 @@ if False:  # If we want to specify precisely what to do ; UI
 
 else:  # EXPERIMENTAL SETUP
     try:
-        folder=sys.argv[1]
+        #folder=sys.argv[1]
         prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
         maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
         saveToFile = True
@@ -768,7 +762,7 @@ else:  # EXPERIMENTAL SETUP
         nbRuns = 10
         reductionK = True
         lim = -1
-        #folder = "Spotify"
+        folder = "Drugs"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
