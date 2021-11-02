@@ -1,3 +1,6 @@
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '5'
+os.environ['MKL_NUM_THREADS'] = '5'
 import numpy as np
 import matplotlib.pyplot as plt
 import sparse
@@ -7,7 +10,6 @@ from sklearn import metrics
 import pickle
 import sys
 import sktensor
-import os
 
 #// region Tools
 
