@@ -802,7 +802,7 @@ else:  # EXPERIMENTAL SETUP
         saveToFile = True
         propTrainingSet = 0.9
         nbRuns = 10
-        reductionK = True
+        reductionK = False
         lim = -1
         #folder = "Drugs"
         # Features, DS, nbInterp, nbClus, buildData, seuil

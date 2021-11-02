@@ -146,7 +146,14 @@ def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False)
         if not os.path.exists("Results/" + folder + "/"):
             os.makedirs("Results/" + folder + "/")
         with open("Results/" + folder + f"/_{txtFin}{features}_{DS}_Results.txt", "w+") as f:
+            firstPassage = True
             for label in sorted(list(tabMetricsAll.keys())):
+                if firstPassage:
+                    f.write("\t")
+                    for metric in tabMetricsAll[label]:
+                        f.write(metric+"\t")
+                    f.write("\n")
+                    firstPassage = False
                 f.write(label+"\t")
                 for metric in tabMetricsAll[label]:
                     f.write("%.4f, " % (tabMetricsAll[label][metric]))
@@ -551,12 +558,8 @@ if False:  # "UI"
         folder=sys.argv[1]
         features = np.array(sys.argv[2].split(","), dtype=int)
         DS=np.array(sys.argv[3].split(","), dtype=int)
-        nbInterpMod1=np.array(sys.argv[4].split(","), dtype=int)
-        nbInterpMod2=np.array(sys.argv[5].split(","), dtype=int)
-        nbInterpMod3 = np.array(sys.argv[6].split(","), dtype=int)
-        nbClusMod1=np.array(sys.argv[7].split(","), dtype=int)
-        nbClusMod2=np.array(sys.argv[8].split(","), dtype=int)
-        nbClusMod3 = np.array(sys.argv[9].split(","), dtype=int)
+        nbInterp=np.array(sys.argv[4].split(","), dtype=int)
+        nbClu=np.array(sys.argv[7].split(","), dtype=int)
         final = int(sys.argv[10])
         redoBL = int(sys.argv[11])
     except Exception as e:
@@ -653,7 +656,7 @@ for index_params, list_params in enumerate(paramsDS):
         print("Compute BL :", redoBL)
         if redoBL:
             import Baselines
-            Baselines.run(folder, DS, features, nbClusMod1, nbInterpMod1, skipSimpleOnes=skipSimpleOnes)
+            Baselines.run(folder, DS, features, nbClus, nbInterp, skipSimpleOnes=skipSimpleOnes)
             skipSimpleOnes = True
 
         print("Import params")
