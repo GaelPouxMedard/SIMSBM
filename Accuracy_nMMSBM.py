@@ -135,14 +135,14 @@ def recoverParams(folder, nbClus, nbInterp, final = True, run=-1):
     return thetas, p, featToClus, popFeat
 
 
-def saveResults(tabMetricsAll, folder, DS, printRes=True, final=False):
+def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False):
     try:
         if final:
             txtFin = "/Final/"
         else:
             txtFin = ""
 
-        with open("Output/" + folder + txtFin + f"/{DS}_Results.txt", "w+") as f:
+        with open("Output/" + folder + txtFin + f"/{features}_{DS}_Results.txt", "w+") as f:
             for label in tabMetricsAll:
                 f.write(label+"\t")
                 for metric in tabMetricsAll[label]:
@@ -348,17 +348,10 @@ def getElemProb(c, thetas, p, featToClus):
     return v
 
 
-def buildArraysProbs(folder, features, DS, alpha, alphaTe, tabThetas, tabP, tabFeatToClus, tabNbInterp):
+def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, featToClus, nbInterp):
     features, outcome, featToInt, outToInt, IDsTe = getDataTe(folder, features, DS, lim=1e20)
 
-    thetasMod1, thetasMod2, thetasMod3 = tabThetas
-    pMod1, pMod2, pMod3 = tabP
-    featToClusMod1, featToClusMod2, featToClusMod3 = tabFeatToClus
-    nbInterpMod1, nbInterpMod2, nbInterpMod3 = tabNbInterp
-
-    indsMod1 = getIndsMod(DS, nbInterpMod1)
-    indsMod2 = getIndsMod(DS, nbInterpMod2)
-    indsMod3 = getIndsMod(DS, nbInterpMod3)
+    inds = getIndsMod(DS, nbInterp)
 
     print("Build BL")
     pBL = alpha.sum(list(range(len(alpha_Tr.shape)-1))).todense()
@@ -376,7 +369,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, tabThetas, tabP, tabF
 
     lg = len(IDsTe)
     nb=0
-    dicTrue, dicProbMod1, dicProbMod2, dicProbMod3, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+    dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
     for j, id in enumerate(IDsTe):
         if j % 10 == 0: print("Build list probs", j * 100. / lg, "%")
         if j*100./lg>0.2 and False:
@@ -428,7 +421,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, tabThetas, tabP, tabF
             dicWeights[k]+=1
         '''
 
-        tempProbMod1, tempProbMod2, tempProbMod3, tempProbBL, tempProbPF, tempProbNMF, tempProbTF, tempProbKNN, tempProbNB, tempProbRand = [], [], [], [], [], [], [], [], [], []
+        tempProbMod, tempProbBL, tempProbPF, tempProbNMF, tempProbTF, tempProbKNN, tempProbNB, tempProbRand = [], [], [], [], [], [], [], []
         for ktup in listKeys:
             k = sum(ktup, ())
             karray = np.array(k)
@@ -438,9 +431,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, tabThetas, tabP, tabF
             try:tempProbPF.append(pPF[k])
             except:tempProbPF.append(np.zeros((nbOut)))
 
-            tempProbMod1.append(getElemProb(karray[indsMod1], thetasMod1, pMod1, featToClusMod1))
-            tempProbMod2.append(getElemProb(karray[indsMod2], thetasMod2, pMod2, featToClusMod2))
-            tempProbMod3.append(getElemProb(karray[indsMod3], thetasMod3, pMod3, featToClusMod3))
+            tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
 
             try: tempProbNMF.append(WNMF[coordToInt[str(k)]].dot(HNMF))
             except: tempProbNMF.append(np.zeros((nbOut)))
@@ -460,9 +451,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, tabThetas, tabP, tabF
             a[o] = 1
 
         dicTrue[j] = a
-        dicProbMod1[j]=np.mean(tempProbMod1, axis=0)
-        dicProbMod2[j]=np.mean(tempProbMod2, axis=0)
-        dicProbMod3[j]=np.mean(tempProbMod3, axis=0)
+        dicProbMod[j]=np.mean(tempProbMod, axis=0)
         dicProbPF[j]=np.mean(tempProbPF, axis=0)
         dicProbBL[j]=np.mean(tempProbBL, axis=0)
         dicProbNMF[j]=np.mean(tempProbNMF, axis=0)
@@ -477,11 +466,11 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, tabThetas, tabP, tabF
 
 
     tabK = list(dicTrue.keys())
-    listTrue, listProbMod1, listProbMod2, listProbMod3, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
-        dicsToList(tabK, dicTrue, dicProbMod1, dicProbMod2, dicProbMod3, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights)
+    listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
+        dicsToList(tabK, dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights)
     print(nb, len(listWeights))
     print("Min coverage error:", np.average(np.sum(listTrue, axis=1), weights=listWeights)-1)
-    return listTrue, listProbMod1, listProbMod2, listProbMod3, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights
+    return listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights
 
 #// endregion
 
@@ -553,71 +542,147 @@ nbInterpMod3 = [1, 1, 1, 1]
 '''
 
 final = False
-redoBL = False
+redoBL = True
 run=0
 
+if False:  # "UI"
+    try:
+        folder=sys.argv[1]
+        features = np.array(sys.argv[2].split(","), dtype=int)
+        DS=np.array(sys.argv[3].split(","), dtype=int)
+        nbInterpMod1=np.array(sys.argv[4].split(","), dtype=int)
+        nbInterpMod2=np.array(sys.argv[5].split(","), dtype=int)
+        nbInterpMod3 = np.array(sys.argv[6].split(","), dtype=int)
+        nbClusMod1=np.array(sys.argv[7].split(","), dtype=int)
+        nbClusMod2=np.array(sys.argv[8].split(","), dtype=int)
+        nbClusMod3 = np.array(sys.argv[9].split(","), dtype=int)
+        final = int(sys.argv[10])
+        redoBL = int(sys.argv[11])
+    except Exception as e:
+        print(e)
+        pass
 
-try:
-    folder=sys.argv[1]
-    features = np.array(sys.argv[2].split(","), dtype=int)
-    DS=np.array(sys.argv[3].split(","), dtype=int)
-    nbInterpMod1=np.array(sys.argv[4].split(","), dtype=int)
-    nbInterpMod2=np.array(sys.argv[5].split(","), dtype=int)
-    nbInterpMod3 = np.array(sys.argv[6].split(","), dtype=int)
-    nbClusMod1=np.array(sys.argv[7].split(","), dtype=int)
-    nbClusMod2=np.array(sys.argv[8].split(","), dtype=int)
-    nbClusMod3 = np.array(sys.argv[9].split(","), dtype=int)
-    final = int(sys.argv[10])
-    redoBL = int(sys.argv[11])
-except Exception as e:
-    print(e)
-    pass
+else:  # Experimental evaluation
+    try:
+        #folder=sys.argv[1]
+        folder="Drugs"
+        #folder = "Spotify"
+        # Features, DS, nbInterp, nbClus, buildData, seuil
+        paramsDS = []
+        if "pubmed" in folder.lower():
+            # 0 = symptoms  ;  o = disease
+            list_params = []
+            list_params.append(([0], [3], [1], [20], False, 500))
+            list_params.append(([0], [3], [2], [20], False, 500))
+            list_params.append(([0], [3], [3], [20], False, 500))
+            paramsDS.append(list_params)
+        if "spotify" in folder.lower():
+            # 0 = artists  ;  o = next artist
+            list_params = []
+            list_params.append(([0], [3], [1], [20], False, 2))
+            list_params.append(([0], [3], [2], [20], False, 2))
+            list_params.append(([0], [3], [3], [20], False, 2))
+            paramsDS.append(list_params)
+        if "dota" in folder.lower():
+            # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
+            list_params = []
+            list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], False, 0))
+            list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 0))
+            list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 0))
+            paramsDS.append(list_params)
+        if "imdb" in folder.lower():
+            # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
+            list_params = []
+            list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
+            paramsDS.append(list_params)
 
+            list_params = []
+            list_params.append(([2, 3], [1, 2], [1, 1], [10, 10], False, 0))
+            list_params.append(([2, 3], [1, 2], [1, 2], [10, 10], False, 0))
+            paramsDS.append(list_params)
+
+            list_params = []
+            list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
+            paramsDS.append(list_params)
+
+            list_params = []
+            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], False, 0))  # Maybe too large
+            list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
+            paramsDS.append(list_params)
+        if "drugs" in folder.lower():
+            # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
+            list_params = []
+            list_params.append(([0], [3], [1], [10], False, 0))
+            list_params.append(([0], [3], [2], [10], False, 0))
+            list_params.append(([0], [3], [3], [10], False, 0))
+            paramsDS.append(list_params)
+
+            list_params = []
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [10, 3, 3, 5], False, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [10, 3, 3, 5], False, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [10, 3, 3, 5], False, 0))
+            paramsDS.append(list_params)
+
+            list_params = []
+            list_params.append(([0, 3], [3, 1], [1, 1], [10, 5], False, 0))
+            list_params.append(([0, 3], [3, 1], [2, 1], [10, 5], False, 0))
+            list_params.append(([0, 3], [3, 1], [3, 1], [10, 5], False, 0))
+            paramsDS.append(list_params)
+        if "mrbanks" in folder.lower():
+            # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
+            list_params = []
+            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 1, 1, 1], [5, 5, 3, 3], False, 0))
+            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
+            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
+            paramsDS.append(list_params)
+
+            list_params = []
+            list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
+            list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
+            list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
+            paramsDS.append(list_params)
+    except Exception as e:
+        print(e)
+        pass
 
 print(folder)
+for index_params, list_params in enumerate(paramsDS):
+    skipSimpleOnes = False
+    tabMetricsAll = {}
+    for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
+        print("Compute BL :", redoBL)
+        if redoBL:
+            import Baselines
+            Baselines.run(folder, DS, features, nbClusMod1, nbInterpMod1, skipSimpleOnes=skipSimpleOnes)
+            skipSimpleOnes = True
 
-print("Compute BL :", redoBL)
-if redoBL:
-    import Baselines
-    Baselines.run(folder, DS, features, nbClusMod1, nbInterpMod1)
+        print("Import params")
+        alpha_Tr, alpha_Te = recoverData(folder, DS)
+        nbOut = alpha_Tr.shape[-1]
 
-print("Import params")
-alpha_Tr, alpha_Te = recoverData(folder, DS)
-nbOut = alpha_Te.shape[-1]
+        probsMod = 0.
+        thetasMod, pMod, featToClusMod, popFeatMod = recoverParams(folder, nbClus, nbInterp, final=final, run=run)
 
-probsMod1, probsMod2, probsMod3 = 0., 0., 0.
-thetasMod1, pMod1, featToClusMod1, popFeatMod1 = recoverParams(folder, nbClusMod1, nbInterpMod1, final=final, run=run)
-thetasMod2, pMod2, featToClusMod2, popFeatMod2 = recoverParams(folder, nbClusMod2, nbInterpMod2, final=final, run=run)
-thetasMod3, pMod3, featToClusMod3, popFeatMod3 = recoverParams(folder, nbClusMod3, nbInterpMod3, final=final, run=run)
-
-tabThetas = [thetasMod1, thetasMod2, thetasMod3]
-tabP = [pMod1, pMod2, pMod3]
-tabFeatToClus = [featToClusMod1, featToClusMod2, featToClusMod3]
-tabNbInterp = [nbInterpMod1, nbInterpMod2, nbInterpMod3]
-
-
-print("Build probs")
-tabMetricsAll = {}
-listTrue, listProbMod1, listProbMod2, listProbMod3, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
-    buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, tabThetas, tabP, tabFeatToClus, tabNbInterp)
-
-print("Compute metrics")
-tabMetricsAll = scores(listTrue, listProbTF, listWeights, "TF", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbNMF, listWeights, "NMF", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbKNN, listWeights, "KNN", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbNB, listWeights, "NB", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbMod1, listWeights, "Mod1", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbMod2, listWeights, "Mod2", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbMod3, listWeights, "Mod3", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbBL, listWeights, "BL", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbPF, listWeights, "PF", tabMetricsAll, nbOut)
-tabMetricsAll = scores(listTrue, listProbRand, listWeights, "Rand", tabMetricsAll, nbOut)
-print("\n\n")
-saveResults(tabMetricsAll, folder, DS, printRes=True, final=final)
+        tabThetas = [thetasMod]
+        tabP = [pMod]
 
 
-#naTe = normalized(alpha_Te)
-#calib = np.mean(np.abs(probs.data-naTe.data))
+        print("Build probs")
+        listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
+            buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, tabThetas, tabP, featToClus, nbInterp)
+
+        print("Compute metrics")
+        tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbNMF, listWeights, "NMF", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbKNN, listWeights, "KNN", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbNB, listWeights, "NB", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbMod1, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbBL, listWeights, "BL", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbPF, listWeights, "PF", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbRand, listWeights, "Rand", tabMetricsAll, nbOut)
+        print("\n\n")
+        saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
+
 
 
 pause()

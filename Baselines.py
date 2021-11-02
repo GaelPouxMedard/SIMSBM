@@ -238,14 +238,15 @@ def TF(DS, folder, nbClus, nbInterp):
 
     run(DS, folder, nbClus, nbInterp, norm, step, N)
 
-def run(folder, DS, features, nbClusMod1, nbInterpMod1):
+def run(folder, DS, features, nbClusMod1, nbInterpMod1, skipSimpleOnes=False):
     fname = getName(DS, folder)
     print(fname)
 
     X, y, D, coordsToInt = buildArraysProbs(folder, features, DS)
 
-    MF(fname, D, coordsToInt)
-    classifiers(fname, X, y)
+    if not skipSimpleOnes:
+        MF(fname, D, coordsToInt)
+        classifiers(fname, X, y)
     TF(DS, folder, nbClusMod1, nbInterpMod1)
 
 '''
