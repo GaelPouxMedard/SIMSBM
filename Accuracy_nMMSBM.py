@@ -568,8 +568,8 @@ if False:  # "UI"
 
 else:  # Experimental evaluation
     try:
-        #folder=sys.argv[1]
-        folder="Drugs"
+        folder=sys.argv[1]
+        #folder="Drugs"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         paramsDS = []
         if "pubmed" in folder.lower():
