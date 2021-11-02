@@ -29,9 +29,48 @@ fp = open("memory_profiler_Norm.log", "a")
 @profile(stream=fp, precision=5)
 '''
 
+'''  Why we cannot set the initial diagonals equals to frequency
+popFeat = [200]
+nbClus = [20]
+nbOutputs = 100
+nbInterp = [2]
+A = np.random.random((popFeat[0], nbClus[0]))
 
-from memory_profiler import profile
-fp = open("memory_profiler_Norm.log", "w+")
+shape = []
+for i, p in enumerate(popFeat):
+    for _ in range(nbInterp[i]):
+        shape.append(p)
+shape.append(nbOutputs)
+
+Z = np.random.random(shape)
+Z_mask = np.zeros(shape)
+indices_diag = None
+for i, dim in enumerate(nbInterp):
+    n = popFeat[i]
+    if dim == 1:
+        x = np.ones((n))
+    else:
+        x = np.zeros([n for _ in range(dim)])
+        L = np.ones((n))
+        x[np.diag_indices(n, ndim=dim)] = L
+    if indices_diag is None:
+        indices_diag = x
+    else:
+        indices_diag = np.tensordot(indices_diag, x, axe=0)
+indices_diag = np.tensordot(indices_diag, np.ones((nbOutputs)), axes=0)
+Z_mask[indices_diag.astype(bool)] = 1
+Z *= Z_mask
+Z_mask = Z_mask.astype(bool)
+# AX = B
+
+X_inf = np.linalg.pinv(A).dot(np.linalg.pinv(A).dot(Z))
+print(np.allclose(A.dot(A.dot(X_inf))[Z_mask], Z[Z_mask]))
+print(list(A.dot(A.dot(X_inf))[Z_mask].flatten()))
+print(list(Z[Z_mask].flatten()))
+print(np.abs(np.mean(A.dot(A.dot(X_inf))[Z_mask]-Z[Z_mask])))
+sys.exit()
+'''
+
 
 seed = 111
 np.random.seed(seed)
@@ -238,8 +277,9 @@ def weightedBinomCoeff(a, arrFeat, nbFeat):
 #// region Fit tools
 
 # Computes the likelihood of the model
-def likelihood(thetas, p, alpha, featToClus):
+def likelihood_old(thetas, p, alpha, featToClus):
     nbFeat = len(featToClus)
+    print("prout")
 
     if sparseMatrices:
         coords = alpha.nonzero()
@@ -527,6 +567,8 @@ def initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus):
         t = t / np.sum(t, axis=1)[:, None]
         thetas.append(t)
 
+    np.random.seed(1234789)
+
     shape = [nbClus[featToClus[i]] for i in range(nbFeat)]
     shape.append(nbOutputs)
     p = np.random.random(tuple(shape))  # K, K, L, O
@@ -754,7 +796,7 @@ if False:  # If we want to specify precisely what to do ; UI
 
 else:  # EXPERIMENTAL SETUP
     try:
-        folder=sys.argv[1]
+        #folder=sys.argv[1]
         prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
         maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
         saveToFile = True
@@ -762,7 +804,7 @@ else:  # EXPERIMENTAL SETUP
         nbRuns = 10
         reductionK = True
         lim = -1
-        #folder = "Drugs"
+        folder = "Spotify"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
