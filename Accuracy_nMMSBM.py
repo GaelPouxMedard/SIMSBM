@@ -19,7 +19,7 @@ def normalized(a, dicForm=False):
     nnz = set(zip(*a.nonzero()[:-1]))
     lg=len(nnz)
     for ind, c in enumerate(nnz):
-        if ind%1000==0: print("Normalizing", ind*100./lg, "%")
+        if ind%(lg//10)==0: print("Normalizing", ind*100./lg, "%")
 
         if c not in dicMax: dicMax[c] = np.sum(a[c])
 
@@ -246,7 +246,7 @@ def getDataTe(folder, featuresData, DS, lim=1e20):
             num, out = line.replace("\n", "").split("\t")
             num = int(num)
             if num not in IDsTe: continue
-            if j%1==0: print("Outcomes:", j*100/lg, "%")
+            if j%(lg//10)==0: print("Outcomes:", j*100/lg, "%")
             j+=1
             if j==len(IDsTe): break
             out = out.split(" ")
@@ -272,7 +272,7 @@ def getDataTe(folder, featuresData, DS, lim=1e20):
                 num, feat = line.replace("\n", "").split("\t")
                 num = int(num)
                 if num not in IDsTe: continue
-                if j%1==0: print(f"Features {featuresData[i]}:", j*100/lg, "%")
+                if j%(lg//10)==0: print(f"Features {featuresData[i]}:", j*100/lg, "%")
                 j+=1
                 if j==len(IDsTe): break
                 feat = feat.split(" ")
@@ -381,7 +381,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     nb=0
     dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
     for j, id in enumerate(IDsTe):
-        if j % 10 == 0: print("Build list probs", j * 100. / lg, "%")
+        if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, "%")
         if j*100./lg>0.2 and False:
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")

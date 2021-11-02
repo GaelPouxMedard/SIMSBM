@@ -138,7 +138,7 @@ def buildArraysProbs(folder, features, DS):
 
     coords = {}
     for j, id in enumerate(IDsTr):
-        if j % (lg/10) == 0: print("Build list probs", j * 100. / lg, "%")
+        if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, "%")
         if j*100./lg>101: break
 
         if id not in outcome: continue
