@@ -7,6 +7,7 @@ from sklearn import metrics
 import pickle
 import sys
 import sktensor
+import os
 
 #// region Tools
 
@@ -138,12 +139,14 @@ def recoverParams(folder, nbClus, nbInterp, final = True, run=-1):
 def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False):
     try:
         if final:
-            txtFin = "/Final/"
+            txtFin = "_Final_"
         else:
             txtFin = ""
 
-        with open("Output/" + folder + txtFin + f"/{features}_{DS}_Results.txt", "w+") as f:
-            for label in tabMetricsAll:
+        if not os.path.exists("Results/" + folder + "/"):
+            os.makedirs("Results/" + folder + "/")
+        with open("Results/" + folder + f"/_{txtFin}{features}_{DS}_Results.txt", "w+") as f:
+            for label in sorted(list(tabMetricsAll.keys())):
                 f.write(label+"\t")
                 for metric in tabMetricsAll[label]:
                     f.write("%.4f, " % (tabMetricsAll[label][metric]))
@@ -517,10 +520,8 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
 folder = "MrBanks"
 features = [0, 1, 2, 3]
 DS = [1, 2, 1, 1]
-nbClusMod1 = nbClusMod2 = nbClusMod3 = [10, 10, 3, 3]
-nbInterpMod1 = [1, 2, 1, 1]
-nbInterpMod2 = [1, 1, 1, 1]
-nbInterpMod3 = [1, 1, 1, 1]
+nbClus = [10, 10, 3, 3]
+nbInterp = [1, 2, 1, 1]
 
 '''
 folder = "Imdb"
@@ -541,7 +542,7 @@ nbInterpMod2 = [1, 1, 1, 1]
 nbInterpMod3 = [1, 1, 1, 1]
 '''
 
-final = False
+final = True
 redoBL = True
 run=0
 
@@ -566,7 +567,6 @@ else:  # Experimental evaluation
     try:
         #folder=sys.argv[1]
         folder="Drugs"
-        #folder = "Spotify"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         paramsDS = []
         if "pubmed" in folder.lower():
@@ -661,22 +661,19 @@ for index_params, list_params in enumerate(paramsDS):
         nbOut = alpha_Tr.shape[-1]
 
         probsMod = 0.
-        thetasMod, pMod, featToClusMod, popFeatMod = recoverParams(folder, nbClus, nbInterp, final=final, run=run)
-
-        tabThetas = [thetasMod]
-        tabP = [pMod]
+        thetasMod, pMod, featToClus, popFeat = recoverParams(folder, nbClus, nbInterp, final=final, run=run)
 
 
         print("Build probs")
         listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
-            buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, tabThetas, tabP, featToClus, nbInterp)
+            buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, thetasMod, pMod, featToClus, nbInterp)
 
         print("Compute metrics")
         tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut)
         tabMetricsAll = scores(listTrue, listProbNMF, listWeights, "NMF", tabMetricsAll, nbOut)
         tabMetricsAll = scores(listTrue, listProbKNN, listWeights, "KNN", tabMetricsAll, nbOut)
         tabMetricsAll = scores(listTrue, listProbNB, listWeights, "NB", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbMod1, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbMod, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut)
         tabMetricsAll = scores(listTrue, listProbBL, listWeights, "BL", tabMetricsAll, nbOut)
         tabMetricsAll = scores(listTrue, listProbPF, listWeights, "PF", tabMetricsAll, nbOut)
         tabMetricsAll = scores(listTrue, listProbRand, listWeights, "Rand", tabMetricsAll, nbOut)
