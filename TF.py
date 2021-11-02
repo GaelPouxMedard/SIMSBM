@@ -108,7 +108,7 @@ def TPTF(X, Xtest, dims, rank, reg, reg_S, lr, lrS, max_iter, tol=1e-4):
 			save_model(args, core, U, args.fname)
 
 		#''' Early Stopping
-		if change_rate > -tol and pre_loss > 0 and iter_count>10:
+		if change_rate > -tol and pre_loss > 0 and iter_count>20:
 			print("[TF] Early Stoping due to insufficient or positive change in training loss!")
 			iter_count = max_iter
 			break
