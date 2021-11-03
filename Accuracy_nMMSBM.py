@@ -360,7 +360,7 @@ def getElemProb(c, thetas, p, featToClus):
         for j in range(nbInterp[i]):
             print(thetas[featToClus[index]].shape, featToClus[index])
             tet = thetas[featToClus[index]][c[index]]  # k
-            probs = tet.dot(probs)
+            probs = np.tensordot(tet, probs, axes=1)
             index += 1
     v = probs
 
