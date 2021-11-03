@@ -230,7 +230,7 @@ def MF(fname, D, coordsToInt):
             f.write(str(c) + "\t" + str(coordsToInt[c]) + "\n")
 
 def TF(DS, folder, nbClus, nbInterp):
-    from TensorDecomposition import run
+    from TensorDecomposition import run as runTD
 
     norm = 0.001
     step = 0.0001
@@ -238,7 +238,7 @@ def TF(DS, folder, nbClus, nbInterp):
     #N = 2
     #print("================= REMOVE ME REMOVE ME REMOVE ME f° TF !!! =====================")
 
-    run(DS, folder, nbClus, nbInterp, norm, step, N)
+    runTD(DS, folder, nbClus, nbInterp, norm, step, N)
 
 def run(folder, DS, features, nbClusMod1, nbInterpMod1, skipSimpleOnes=False):
     fname = getName(DS, folder)

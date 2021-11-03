@@ -49,9 +49,12 @@ def getName(DS, folder, nbClus, nbInterp):
         for i in range(interp):
             featToClus.append(iter)
     featToClus = np.array(featToClus, dtype=int)
+
+
     codeT = ""
-    for i in featToClus:
-        codeT += str(nbClus[i]) + "-"
+    for i in range(len(DS)):
+        for _ in range(nbInterp[i]):
+            codeT += str(nbClus[i]) + "-"
     codeT = codeT[:-1]
 
     return "Output/" + folder + "/" + codeSave, codeT
@@ -90,6 +93,16 @@ def run(DS, folder, nbClus, nbInterp, norm, step, N):
     print(fname)
 
     alphaTr, alphaTe = readMatrix(fname.replace("Output", "Data")+"_AlphaTr.npz"), readMatrix(fname.replace("Output", "Data")+"_AlphaTe.npz")
+
+    toRem, ind = [], 0
+    for i in range(len(DS)):
+        if DS[i] != nbInterp[i]:
+            for t in range(ind, ind+DS[i]-nbInterp[i]):
+                toRem.append(t)
+        ind += DS[i]
+    if len(toRem)!=0:
+        alphaTr = alphaTr.sum(toRem)
+        alphaTe = alphaTe.sum(toRem)
 
     codeClus += f"-{np.min([20, int(list(alphaTr.shape)[-1])])}"  # Clusters pour l'output
 
