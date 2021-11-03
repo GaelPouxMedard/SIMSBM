@@ -351,7 +351,7 @@ def getProbTF(k, U, core):
 def getElemProb(c, thetas, p, featToClus):
     nbFeat = len(featToClus)
 
-    print(c, len(thetas), thetas[0].shape)
+    print(c, len(thetas), thetas[0].shape, featToClus)
 
     p = np.moveaxis(p, -1, 0)
     probs = p
