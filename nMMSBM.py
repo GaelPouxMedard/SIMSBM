@@ -567,8 +567,6 @@ def initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus):
         t = t / np.sum(t, axis=1)[:, None]
         thetas.append(t)
 
-    np.random.seed(1234789)
-
     shape = [nbClus[featToClus[i]] for i in range(nbFeat)]
     shape.append(nbOutputs)
     p = np.random.random(tuple(shape))  # K, K, L, O
