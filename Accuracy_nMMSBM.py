@@ -461,7 +461,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             # [inds] important car réduit le DS au modèle considéré
             tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
 
-            try: tempProbNMF.append(WNMF[coordToInt[str(tuple(karray))]].dot(HNMF))
+            try: tempProbNMF.append(WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF))
             except: tempProbNMF.append(np.zeros((nbOut)))
 
             tempProbTF.append(getProbTF(karray[inds], modU, modCore))
