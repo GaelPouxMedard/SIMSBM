@@ -169,9 +169,9 @@ def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False)
 
 def loadModel(folder, DS, model="NB"):
     strT = ""
-    for f, interp in enumerate(DS):
-        for i in range(interp):
-            strT += str(f) + "-"
+    for i in range(len(DS)):
+        for _ in range(nbInterp[i]):
+            strT += str(DS[i]) + "-"
     strT = strT[:-1]
     filename = f"Output/{folder}/" + strT + f"_{model}.sav"
 
@@ -387,8 +387,8 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     print("Build PF")
     pPF = normalized(alpha_BL_Te, dicForm=True)
 
-    modKNN = loadModel(folder, DS, model="KNN")
-    modNB = loadModel(folder, DS, model="NB")
+    modKNN = loadModel(folder, DS, nbInterp, model="KNN")
+    modNB = loadModel(folder, DS, nbInterp, model="NB")
     WNMF, HNMF, coordToInt = loadMF(folder, DS, nbInterp, model="NMF")
     modU, modCore = loadTF(folder, DS, nbInterp, model="TF")
 
