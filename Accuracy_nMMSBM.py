@@ -369,7 +369,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     inds = getIndsMod(DS, nbInterp)
 
     print("Build BL")
-    pBL = alpha.sum(list(range(len(alpha_Tr.shape)-1))).todense()
+    pBL = alpha.sum(list(range(len(alpha.shape)-1))).todense()
     pBL = pBL/sum(pBL)
 
     print("Build PF")
@@ -452,7 +452,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             try: tempProbNMF.append(WNMF[coordToInt[str(k)]].dot(HNMF))
             except: tempProbNMF.append(np.zeros((nbOut)))
 
-            tempProbTF.append(getProbTF(karray, modU, modCore))
+            tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
             tempProbKNN.append(modKNN.predict_proba([karray])[0])
             tempProbNB.append(modNB.predict_proba([karray])[0])
@@ -667,17 +667,6 @@ for index_params, list_params in enumerate(paramsDS):
 
         print("Import params")
         alpha_Tr, alpha_Te = recoverData(folder, DS)
-        # Reduces alpha to fit the model's format
-        toRem, ind = [], 0
-        for i in range(len(DS)):
-            if DS[i] != nbInterp[i]:
-                for t in range(ind, ind+DS[i]-nbInterp[i]):
-                    toRem.append(t)
-            ind += DS[i]
-        if len(toRem)!=0:
-            alpha_Tr = alpha_Tr.sum(toRem)
-            alpha_Te = alpha_Te.sum(toRem)
-
         nbOut = alpha_Tr.shape[-1]
 
         probsMod = 0.
