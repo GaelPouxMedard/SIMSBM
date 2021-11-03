@@ -466,8 +466,8 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
 
             tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
-            tempProbKNN.append(modKNN.predict_proba([karray])[0])
-            tempProbNB.append(modNB.predict_proba([karray])[0])
+            tempProbKNN.append(modKNN.predict_proba([karray[inds]])[0])
+            tempProbNB.append(modNB.predict_proba([karray[inds]])[0])
 
             rnd = np.random.random((nbOut))
             rnd/=np.sum(rnd)
