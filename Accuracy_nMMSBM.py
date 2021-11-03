@@ -351,13 +351,10 @@ def getProbTF(k, U, core):
 def getElemProb(c, thetas, p, featToClus):
     nbFeat = len(featToClus)
 
-    print(c, len(thetas), featToClus, p.shape)
-
     probs = p
     index = 0
     for i in range(nbFeat):
         for j in range(nbInterp[i]):
-            print(thetas[featToClus[index]].shape, featToClus[index])
             tet = thetas[featToClus[index]][c[index]]  # k
             probs = np.tensordot(tet, probs, axes=1)
             index += 1
@@ -449,7 +446,8 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             try:tempProbPF.append(pPF[k])
             except:tempProbPF.append(np.zeros((nbOut)))
 
-            tempProbMod.append(getElemProb(karray, thetasMod, pMod, featToClus))
+            # [inds] important car réduit le DS au modèle considéré
+            tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
 
             try: tempProbNMF.append(WNMF[coordToInt[str(k)]].dot(HNMF))
             except: tempProbNMF.append(np.zeros((nbOut)))
