@@ -801,7 +801,7 @@ else:  # EXPERIMENTAL SETUP
         maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
         saveToFile = True
         propTrainingSet = 0.9
-        nbRuns = 10
+        nbRuns = 100
         reductionK = False
         lim = -1
         #folder = "Drugs"
@@ -821,6 +821,7 @@ else:  # EXPERIMENTAL SETUP
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
+            nbRuns = 10
             list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], False, 0))
             list_params.append(([0, 1], [3, 3], [2, 2], [5, 5], False, 0))
             list_params.append(([0, 1], [3, 3], [3, 3], [5, 5], False, 0))
