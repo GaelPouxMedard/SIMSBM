@@ -149,7 +149,7 @@ def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False)
             os.makedirs("Results/" + folder + "/")
         with open("Results/" + folder + f"/_{txtFin}{features}_{DS}_Results.txt", "w+") as f:
             firstPassage = True
-            for label in sorted(list(tabMetricsAll.keys())):
+            for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
                 if firstPassage:
                     f.write("\t")
                     for metric in tabMetricsAll[label]:
@@ -675,13 +675,13 @@ for index_params, list_params in enumerate(paramsDS):
 
         print("Compute metrics")
         tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbNMF, listWeights, "NMF", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbKNN, listWeights, "KNN", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbNB, listWeights, "NB", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbNMF, listWeights, f"NMF_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbKNN, listWeights, f"KNN_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbNB, listWeights, f"NB_{nbInterp}", tabMetricsAll, nbOut)
         tabMetricsAll = scores(listTrue, listProbMod, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbBL, listWeights, "BL", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbPF, listWeights, "PF", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbRand, listWeights, "Rand", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbBL, listWeights, f"BL_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbPF, listWeights, f"PF_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut)
         print("\n\n")
         saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
 
