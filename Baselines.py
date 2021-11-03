@@ -34,12 +34,13 @@ def readMatrix(filename):
 
     # return sparse.csr_matrix(new_data)
 
-def getName(DS, folder):
+def getName(DS, nbInterp, folder):
     codeSave = ""
     for i in range(len(DS)):
-        for j in range(DS[i]):
-            codeSave += str(i) + "-"
+        for _ in range(nbInterp[i]):
+            codeSave += str(DS[i]) + "-"
     codeSave = codeSave[:-1]
+
     return "Output/" + folder + "/" + codeSave
 
 def getDataTr(folder, featuresData, DS, lim=1e20):
@@ -122,17 +123,28 @@ def getDataTr(folder, featuresData, DS, lim=1e20):
 
     return features, outcome, featToInt, outToInt, IDsTr
 
-def buildArraysProbs(folder, features, DS):
+def getIndsMod(DS, nbInterp):
+    indsMod = []
+    ind = 0
+    for i in range(len(DS)):
+        for j in range(nbInterp[i]):
+            indsMod.append(ind+j)
+        ind += DS[i]
+
+    return np.array(indsMod)
+
+def buildArraysProbs(folder, features, DS, nbInterp):
     features, outcome, featToInt, outToInt, IDsTr = getDataTr(folder, features, DS, lim=1e20)
 
     nbOut = len(outToInt)
 
     lg = len(IDsTr)
     nb=0
+    inds = getIndsMod(DS, nbInterp)
 
     X, y = [], []
     for i in range(nbOut):  # Pour pas qu'il reclassifie
-        X.append(np.zeros((sum(DS)))-1)
+        X.append(np.zeros((sum(DS)))[inds]-1)
         y.append(i)
 
     coords = {}
@@ -152,7 +164,7 @@ def buildArraysProbs(folder, features, DS):
         for ktup in listKeys:
 
             k = sum(ktup, ())
-            karray = np.array(k)
+            karray = np.array(k)[inds]
             nb+=1
 
             for o in outcome[id]:
@@ -239,15 +251,14 @@ def TF(DS, folder, nbClus, nbInterp):
 
     runTD(DS, folder, nbClus, nbInterp, norm, step, N)
 
-def run(folder, DS, features, nbClusMod1, nbInterpMod1, skipSimpleOnes=False):
-    fname = getName(DS, folder)
+def run(folder, DS, features, nbClusMod1, nbInterpMod1):
+    fname = getName(DS, nbClusMod1, folder)
     print(fname)
 
-    X, y, D, coordsToInt = buildArraysProbs(folder, features, DS)
+    X, y, D, coordsToInt = buildArraysProbs(folder, features, DS, nbInterpMod1)
 
-    if not skipSimpleOnes:
-        MF(fname, D, coordsToInt)
-        classifiers(fname, X, y)
+    MF(fname, D, coordsToInt)
+    classifiers(fname, X, y)
     TF(DS, folder, nbClusMod1, nbInterpMod1)
 
 '''

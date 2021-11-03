@@ -177,7 +177,7 @@ def loadModel(folder, DS, model="NB"):
 
     return pickle.load(open(filename, 'rb'))
 
-def loadMF(folder, DS, model="NMF"):
+def loadMF(folder, DS, nbInterp, model="NMF"):
     strT = ""
     for f, interp in enumerate(DS):
         for i in range(interp):
@@ -374,7 +374,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
 
     modKNN = loadModel(folder, DS, model="KNN")
     modNB = loadModel(folder, DS, model="NB")
-    WNMF, HNMF, coordToInt = loadMF(folder, DS, model="NMF")
+    WNMF, HNMF, coordToInt = loadMF(folder, DS, nbInterp, model="NMF")
     modU, modCore = loadTF(folder, DS, nbInterp, model="TF")
 
     nbOut = alpha_Te.shape[-1]
@@ -653,14 +653,12 @@ else:  # Experimental evaluation
 
 print(folder)
 for index_params, list_params in enumerate(paramsDS):
-    skipSimpleOnes = False
     tabMetricsAll = {}
     for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
         print("Compute BL :", redoBL)
         if redoBL:
             import Baselines
-            Baselines.run(folder, DS, features, nbClus, nbInterp, skipSimpleOnes=skipSimpleOnes)
-            skipSimpleOnes = True
+            Baselines.run(folder, DS, features, nbClus, nbInterp)
 
         print("Import params")
         alpha_Tr, alpha_Te = recoverData(folder, DS)
