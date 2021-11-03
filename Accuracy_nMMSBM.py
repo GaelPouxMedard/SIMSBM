@@ -358,9 +358,9 @@ def getElemProb(c, thetas, p, featToClus):
     index = 0
     for i in range(nbFeat):
         for j in range(nbInterp[i]):
-            print(thetas[featToClus[nbFeat - index - 1]].shape, featToClus[nbFeat - index - 1])
-            tet = thetas[featToClus[nbFeat - index - 1]][c[nbFeat - index - 1]]  # k
-            probs = probs.dot(tet)
+            print(thetas[featToClus[index]].shape, featToClus[index])
+            tet = thetas[featToClus[index]][c[index]]  # k
+            probs = tet.dot(probs)
             index += 1
     v = probs
 
