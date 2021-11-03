@@ -177,6 +177,7 @@ def loadModel(folder, DS, model="NB"):
 
     return pickle.load(open(filename, 'rb'))
 
+
 def loadMF(folder, DS, nbInterp, model="NMF"):
     strT = ""
     for i in range(len(DS)):
@@ -366,12 +367,25 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
 
     inds = getIndsMod(DS, nbInterp)
 
+    toRem, ind = [], 0
+    for i in range(len(DS)):
+        if DS[i] != nbInterp[i]:
+            for t in range(ind, ind+DS[i]-nbInterp[i]):
+                toRem.append(t)
+        ind += DS[i]
+    if len(toRem)!=0:
+        alpha_BL_Tr = alpha.sum(toRem)
+        alpha_BL_Te = alphaTe.sum(toRem)
+    else:
+        alpha_BL_Tr = alpha
+        alpha_BL_Te = alphaTe
+
     print("Build BL")
-    pBL = alpha.sum(list(range(len(alpha.shape)-1))).todense()
+    pBL = alpha_BL_Tr.sum(list(range(len(alpha_BL_Tr.shape)-1))).todense()
     pBL = pBL/sum(pBL)
 
     print("Build PF")
-    pPF = normalized(alphaTe, dicForm=True)
+    pPF = normalized(alpha_BL_Te, dicForm=True)
 
     modKNN = loadModel(folder, DS, model="KNN")
     modNB = loadModel(folder, DS, model="NB")
