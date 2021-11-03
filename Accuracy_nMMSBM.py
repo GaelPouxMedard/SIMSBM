@@ -353,7 +353,7 @@ def getElemProb(c, thetas, p, featToClus):
 
     probs = p
     for i in range(nbFeat):
-        tet = thetas[featToClus[index]][c[i]]  # k
+        tet = thetas[featToClus[i]][c[i]]  # k
         probs = np.tensordot(tet, probs, axes=1)
     v = probs
 
