@@ -669,6 +669,17 @@ for index_params, list_params in enumerate(paramsDS):
 
         print("Import params")
         alpha_Tr, alpha_Te = recoverData(folder, DS)
+        # Reduces alpha to fit the model's format
+        toRem, ind = [], 0
+        for i in range(len(DS)):
+            if DS[i] != nbInterp[i]:
+                for t in range(ind, ind+DS[i]-nbInterp[i]):
+                    toRem.append(t)
+            ind += DS[i]
+        if len(toRem)!=0:
+            alphaTr = alphaTr.sum(toRem)
+            alphaTe = alphaTe.sum(toRem)
+
         nbOut = alpha_Tr.shape[-1]
 
         probsMod = 0.
