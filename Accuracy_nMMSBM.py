@@ -455,7 +455,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             nb+=1
 
             tempProbBL.append(pBL)
-            print(list(pPF.keys())[-1], karray)
+            print(list(pPF.keys())[-1], karray, karray[inds])
             try:tempProbPF.append(pPF[karray[inds]])
             except:tempProbPF.append(np.zeros((nbOut)))
 
