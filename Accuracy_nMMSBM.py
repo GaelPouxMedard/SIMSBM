@@ -194,12 +194,13 @@ def loadMF(folder, DS, model="NMF"):
 
     return W, H, coordToInt
 
-def loadTF(folder, DS, model="TF"):
+def loadTF(folder, DS, nbInterp, model="TF"):
     strT = ""
-    for f, interp in enumerate(DS):
-        for i in range(interp):
-            strT += str(f) + "-"
+    for i in range(len(DS)):
+        for _ in range(nbInterp[i]):
+            strT += str(DS[i]) + "-"
     strT = strT[:-1]
+
     filename = f"Output/{folder}/" + strT + f"_{model}_"
     modU = np.load(f"{filename}U.npy", allow_pickle=True)
     modCore = np.load(f"{filename}core.npy", allow_pickle=True)
@@ -375,7 +376,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     modKNN = loadModel(folder, DS, model="KNN")
     modNB = loadModel(folder, DS, model="NB")
     WNMF, HNMF, coordToInt = loadMF(folder, DS, model="NMF")
-    modU, modCore = loadTF(folder, DS, model="TF")
+    modU, modCore = loadTF(folder, DS, nbInterp, model="TF")
 
     nbOut = alpha_Te.shape[-1]
 

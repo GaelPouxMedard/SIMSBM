@@ -3,7 +3,6 @@ import sparse
 import itertools
 import pickle
 
-
 def normalized(a):
     newCoords, vals = [], []
     dicMax={}

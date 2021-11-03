@@ -39,17 +39,9 @@ def readMatrix(filename):
 def getName(DS, folder, nbClus, nbInterp):
     codeSave = ""
     for i in range(len(DS)):
-        for j in range(DS[i]):
-            codeSave += str(i) + "-"
+        for _ in range(nbInterp[i]):
+            codeSave += str(DS[i]) + "-"
     codeSave = codeSave[:-1]
-
-    featToClus = []
-    nbClus = np.array(nbClus)
-    for iter, interp in enumerate(nbInterp):
-        for i in range(interp):
-            featToClus.append(iter)
-    featToClus = np.array(featToClus, dtype=int)
-
 
     codeT = ""
     for i in range(len(DS)):
