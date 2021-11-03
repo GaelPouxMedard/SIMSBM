@@ -193,7 +193,7 @@ def buildArraysProbs(folder, features, DS, nbInterp):
 
     D = sparse.COO(coordsFin.T, vals, shape=(num, nbOut))
 
-    print(X.shape)
+    print(np.array(X).shape)
     pause()
     return X, y, D, coordsToInt
 
