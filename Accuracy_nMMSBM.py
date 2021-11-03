@@ -455,7 +455,8 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             nb+=1
 
             tempProbBL.append(pBL)
-            try:tempProbPF.append(pPF[karray[inds]])
+            print(pPF.shape, karray)
+            try:tempProbPF.append(pPF[k])
             except:tempProbPF.append(np.zeros((nbOut)))
 
             # [inds] important car réduit le DS au modèle considéré
