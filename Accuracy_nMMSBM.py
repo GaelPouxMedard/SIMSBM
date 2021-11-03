@@ -179,10 +179,11 @@ def loadModel(folder, DS, model="NB"):
 
 def loadMF(folder, DS, nbInterp, model="NMF"):
     strT = ""
-    for f, interp in enumerate(DS):
-        for i in range(interp):
-            strT += str(f) + "-"
+    for i in range(len(DS)):
+        for _ in range(nbInterp[i]):
+            strT += str(DS[i]) + "-"
     strT = strT[:-1]
+
     filename = f"Output/{folder}/" + strT + f"_{model}_"
     W = np.load(filename+"W.npy")
     H = np.load(filename+"H.npy")
