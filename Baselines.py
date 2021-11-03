@@ -234,8 +234,8 @@ def TF(DS, folder, nbClus, nbInterp):
     norm = 0.001
     step = 0.0001
     N = 1000
-    #N = 2
-    #print("================= REMOVE ME REMOVE ME REMOVE ME f° TF !!! =====================")
+    N = 2
+    print("================= REMOVE ME REMOVE ME REMOVE ME f° TF !!! =====================")
 
     runTD(DS, folder, nbClus, nbInterp, norm, step, N)
 
