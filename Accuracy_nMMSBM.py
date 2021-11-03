@@ -351,11 +351,12 @@ def getProbTF(k, U, core):
 def getElemProb(c, thetas, p, featToClus):
     nbFeat = len(featToClus)
 
-    print(c, len(thetas), thetas[0].shape, featToClus)
+    print(c, len(thetas), featToClus)
 
     p = np.moveaxis(p, -1, 0)
     probs = p
     for i in range(nbFeat):
+        print(thetas[i].shape)
         tet = thetas[featToClus[nbFeat - i - 1]][c[nbFeat - i - 1]]  # k
         probs = probs.dot(tet)
     v = probs
