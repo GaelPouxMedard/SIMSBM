@@ -39,9 +39,23 @@ def readMatrix(filename):
 def getName(DS, folder, nbClus, nbInterp):
     codeSave = ""
     for i in range(len(DS)):
-        for _ in range(nbInterp[i]):
-            codeSave += str(DS[i]) + "-"
+        for j in range(DS[i]):
+            codeSave += str(i) + "-"
     codeSave = codeSave[:-1]
+
+    codeSaveTF = ""
+    for i in range(len(DS)):
+        for _ in range(nbInterp[i]):
+            codeSaveTF += str(DS[i]) + "-"
+    codeSaveTF = codeSaveTF[:-1]
+
+    featToClus = []
+    nbClus = np.array(nbClus)
+    for iter, interp in enumerate(nbInterp):
+        for i in range(interp):
+            featToClus.append(iter)
+    featToClus = np.array(featToClus, dtype=int)
+
 
     codeT = ""
     for i in range(len(DS)):
@@ -49,7 +63,7 @@ def getName(DS, folder, nbClus, nbInterp):
             codeT += str(nbClus[i]) + "-"
     codeT = codeT[:-1]
 
-    return "Output/" + folder + "/" + codeSave, codeT
+    return "Output/" + folder + "/" + codeSave, codeT, "Output/" + folder + "/" + codeSaveTF
 
 
 def writeAlphaTF(fname, alphaTr):
@@ -81,10 +95,10 @@ def moveRes(fname, params, codeClus):
 
 
 def run(DS, folder, nbClus, nbInterp, norm, step, N):
-    fname, codeClus = getName(DS, folder, nbClus, nbInterp)
+    fnameAlpha, codeClus, fname = getName(DS, folder, nbClus, nbInterp)
     print(fname)
 
-    alphaTr, alphaTe = readMatrix(fname.replace("Output", "Data")+"_AlphaTr.npz"), readMatrix(fname.replace("Output", "Data")+"_AlphaTe.npz")
+    alphaTr, alphaTe = readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTr.npz"), readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTe.npz")
 
     toRem, ind = [], 0
     for i in range(len(DS)):
