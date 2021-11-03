@@ -41,6 +41,7 @@ def getName(DS, nbInterp, folder):
             codeSave += str(DS[i]) + "-"
     codeSave = codeSave[:-1]
 
+    print(DS, nbInterp, folder, codeSave)
     return "Output/" + folder + "/" + codeSave
 
 def getDataTr(folder, featuresData, DS, lim=1e20):
