@@ -443,7 +443,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             try:tempProbPF.append(pPF[k])
             except:tempProbPF.append(np.zeros((nbOut)))
 
-            tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
+            tempProbMod.append(getElemProb(karray, thetasMod, pMod, featToClus))
 
             try: tempProbNMF.append(WNMF[coordToInt[str(k)]].dot(HNMF))
             except: tempProbNMF.append(np.zeros((nbOut)))
