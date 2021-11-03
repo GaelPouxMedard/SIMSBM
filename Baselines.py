@@ -41,7 +41,6 @@ def getName(DS, nbInterp, folder):
             codeSave += str(DS[i]) + "-"
     codeSave = codeSave[:-1]
 
-    print(DS, nbInterp, folder, codeSave)
     return "Output/" + folder + "/" + codeSave
 
 def getDataTr(folder, featuresData, DS, lim=1e20):
@@ -251,7 +250,7 @@ def TF(DS, folder, nbClus, nbInterp):
     runTD(DS, folder, nbClus, nbInterp, norm, step, N)
 
 def run(folder, DS, features, nbClusMod1, nbInterpMod1):
-    fname = getName(DS, nbClusMod1, folder)
+    fname = getName(DS, nbInterpMod1, folder)
     print(fname)
 
     X, y, D, coordsToInt = buildArraysProbs(folder, features, DS, nbInterpMod1)
