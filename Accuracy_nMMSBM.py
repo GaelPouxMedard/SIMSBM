@@ -591,9 +591,9 @@ else:  # Experimental evaluation
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
-            list_params.append(([0, 1], [3, 3], [1, 1], [10, 10], False, 0))
-            list_params.append(([0, 1], [3, 3], [2, 2], [10, 10], False, 0))
-            list_params.append(([0, 1], [3, 3], [3, 3], [10, 10], False, 0))
+            list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], False, 0))
+            list_params.append(([0, 1], [3, 3], [2, 2], [5, 5], False, 0))
+            list_params.append(([0, 1], [3, 3], [3, 3], [5, 5], False, 0))
             paramsDS.append(list_params)
         if "imdb" in folder.lower():
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
@@ -617,21 +617,21 @@ else:  # Experimental evaluation
         if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
             list_params = []
-            list_params.append(([0], [3], [1], [10], False, 0))
-            list_params.append(([0], [3], [2], [10], False, 0))
-            list_params.append(([0], [3], [3], [10], False, 0))
+            list_params.append(([0], [3], [1], [7], False, 0))
+            list_params.append(([0], [3], [2], [7], False, 0))
+            list_params.append(([0], [3], [3], [7], False, 0))
             paramsDS.append(list_params)
 
             list_params = []
-            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [10, 3, 3, 5], False, 0))
-            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [10, 3, 3, 5], False, 0))
-            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [10, 3, 3, 5], False, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [7, 3, 3, 5], False, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [7, 3, 3, 5], False, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [7, 3, 3, 5], False, 0))
             paramsDS.append(list_params)
 
             list_params = []
-            list_params.append(([0, 3], [3, 1], [1, 1], [10, 5], False, 0))
-            list_params.append(([0, 3], [3, 1], [2, 1], [10, 5], False, 0))
-            list_params.append(([0, 3], [3, 1], [3, 1], [10, 5], False, 0))
+            list_params.append(([0, 3], [3, 1], [1, 1], [7, 5], False, 0))
+            list_params.append(([0, 3], [3, 1], [2, 1], [7, 5], False, 0))
+            list_params.append(([0, 3], [3, 1], [3, 1], [7, 5], False, 0))
             paramsDS.append(list_params)
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
