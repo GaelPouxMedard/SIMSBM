@@ -677,8 +677,8 @@ for index_params, list_params in enumerate(paramsDS):
                     toRem.append(t)
             ind += DS[i]
         if len(toRem)!=0:
-            alphaTr = alphaTr.sum(toRem)
-            alphaTe = alphaTe.sum(toRem)
+            alpha_Tr = alpha_Tr.sum(toRem)
+            alpha_Te = alpha_Te.sum(toRem)
 
         nbOut = alpha_Tr.shape[-1]
 
