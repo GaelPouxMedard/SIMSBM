@@ -353,7 +353,7 @@ def getElemProb(c, thetas, p, featToClus):
 
     print(c, len(thetas), featToClus)
 
-    p = np.moveaxis(p, -1, 0)
+    #p = np.moveaxis(p, -1, 0)
     probs = p
     index = 0
     for i in range(nbFeat):
