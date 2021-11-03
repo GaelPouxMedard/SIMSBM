@@ -167,7 +167,7 @@ def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False)
         pass
 
 
-def loadModel(folder, DS, model="NB"):
+def loadModel(folder, DS, nbInterp, model="NB"):
     strT = ""
     for i in range(len(DS)):
         for _ in range(nbInterp[i]):
