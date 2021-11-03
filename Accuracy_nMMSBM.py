@@ -356,7 +356,7 @@ def getElemProb(c, thetas, p, featToClus):
     p = np.moveaxis(p, -1, 0)
     probs = p
     for i in range(nbFeat):
-        print(thetas[i].shape)
+        print(thetas[featToClus[nbFeat - i - 1]].shape, featToClus[nbFeat - i - 1])
         tet = thetas[featToClus[nbFeat - i - 1]][c[nbFeat - i - 1]]  # k
         probs = probs.dot(tet)
     v = probs
