@@ -396,6 +396,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
 
     lg = len(IDsTe)
     nb=0
+    index_obs = 0
     dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
     for j, id in enumerate(IDsTe):
         if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, "%")
@@ -448,6 +449,10 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             dicWeights[k]+=1
         '''
 
+        a = np.zeros((nbOut))
+        for o in outcome[id]:
+            a[o] = 1
+            
         tempProbMod, tempProbBL, tempProbPF, tempProbNMF, tempProbTF, tempProbKNN, tempProbNB, tempProbRand = [], [], [], [], [], [], [], []
         for ktup in listKeys:
             k = sum(ktup, ())
@@ -473,11 +478,23 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
             rnd/=np.sum(rnd)
             tempProbRand.append(rnd)
 
+            dicTrue[index_obs] = a
+            dicProbMod[index_obs]=tempProbMod[-1]
+            dicProbPF[index_obs]=tempProbPF[-1]
+            dicProbBL[index_obs]=tempProbBL[-1]
+            dicProbNMF[index_obs]=tempProbNMF[-1]
+            dicProbTF[index_obs]=tempProbTF[-1]
+            dicProbKNN[index_obs]=tempProbKNN[-1]
+            dicProbNB[index_obs]=tempProbNB[-1]
+            dicProbRand[index_obs]=tempProbRand[-1]
+    
+            if index_obs not in dicWeights: dicWeights[index_obs]=0
+            dicWeights[index_obs]+=1
 
-        a = np.zeros((nbOut))
-        for o in outcome[id]:
-            a[o] = 1
+            index_obs += 1
 
+
+        ''' # Si on veut average, mais c'est pas la meilleure option
         dicTrue[j] = a
         dicProbMod[j]=np.mean(tempProbMod, axis=0)
         dicProbPF[j]=np.mean(tempProbPF, axis=0)
@@ -490,8 +507,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
 
         if j not in dicWeights: dicWeights[j]=0
         dicWeights[j]+=1
-
-
+        '''
 
     tabK = list(dicTrue.keys())
     listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
