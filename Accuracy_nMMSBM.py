@@ -720,9 +720,22 @@ for index_params, list_params in enumerate(paramsDS):
         saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
         allRes.append(tabMetricsAll)
 
-for tabMetricsAll in allRes:
-    print(tabMetricsAll)
-    print()
+        firstPassage = True
+        for tabMetricsAll in allRes:
+            strRes = ""
+            for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
+                if firstPassage:
+                    strRes += "\t"
+                    for metric in tabMetricsAll[label]:
+                        strRes += metric+"\t"
+                    strRes += "\n"
+                    firstPassage = False
+                strRes += label+"\t"
+                for metric in tabMetricsAll[label]:
+                    strRes += "%.4f\t" % (tabMetricsAll[label][metric])
+                strRes += "\n"
+
+            print(strRes)
 
 pause()
 
