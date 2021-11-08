@@ -166,22 +166,22 @@ def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False)
         pass
 
 
-def loadModel(folder, DS, nbInterp, model="NB"):
+def loadModel(folder, DS, nbInterp, features, model="NB"):
     strT = ""
-    for i in range(len(DS)):
+    for i in range(len(features)):
         for _ in range(nbInterp[i]):
-            strT += str(DS[i]) + "-"
+            strT += str(features[i]) + "-"
     strT = strT[:-1]
     filename = f"Output/{folder}/" + strT + f"_{model}.sav"
 
     return pickle.load(open(filename, 'rb'))
 
 
-def loadMF(folder, DS, nbInterp, model="NMF"):
+def loadMF(folder, DS, nbInterp, features, model="NMF"):
     strT = ""
-    for i in range(len(DS)):
+    for i in range(len(features)):
         for _ in range(nbInterp[i]):
-            strT += str(DS[i]) + "-"
+            strT += str(features[i]) + "-"
     strT = strT[:-1]
 
     filename = f"Output/{folder}/" + strT + f"_{model}_"
@@ -195,11 +195,11 @@ def loadMF(folder, DS, nbInterp, model="NMF"):
 
     return W, H, coordToInt
 
-def loadTF(folder, DS, nbInterp, model="TF"):
+def loadTF(folder, DS, nbInterp, features, model="TF"):
     strT = ""
-    for i in range(len(DS)):
+    for i in range(len(features)):
         for _ in range(nbInterp[i]):
-            strT += str(DS[i]) + "-"
+            strT += str(features[i]) + "-"
     strT = strT[:-1]
 
     filename = f"Output/{folder}/" + strT + f"_{model}_"
@@ -386,10 +386,10 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     print("Build PF")
     pPF = normalized(alpha_BL_Te, dicForm=True)
 
-    modKNN = loadModel(folder, DS, nbInterp, model="KNN")
-    modNB = loadModel(folder, DS, nbInterp, model="NB")
-    WNMF, HNMF, coordToInt = loadMF(folder, DS, nbInterp, model="NMF")
-    modU, modCore = loadTF(folder, DS, nbInterp, model="TF")
+    modKNN = loadModel(folder, DS, nbInterp, features, model="KNN")
+    modNB = loadModel(folder, DS, nbInterp, features, model="NB")
+    WNMF, HNMF, coordToInt = loadMF(folder, DS, nbInterp, features, model="NMF")
+    modU, modCore = loadTF(folder, DS, nbInterp, features, model="TF")
 
     nbOut = alpha_Te.shape[-1]
 
