@@ -629,7 +629,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "imdb" in folder.lower():
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
-            do_TF = False
+            #do_TF = False
             list_params = []
             list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
             paramsDS.append(list_params)
