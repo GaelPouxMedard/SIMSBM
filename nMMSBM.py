@@ -868,7 +868,7 @@ else:  # EXPERIMENTAL SETUP
         pass
 
 
-def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True):
+def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False):
     print("Reduction K", reductionK)
     print("Features", features)
     print("Structure", nbInterp)
@@ -916,7 +916,7 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
 
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False)
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True)
 
 
 
