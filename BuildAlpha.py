@@ -204,9 +204,9 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
 def saveData(alphaTr, alphaTe, folder, nbInterp, featToInt, outToInt, IDsTraining, IDsTest, featuresData):
     codeSave = ""
-    for i in range(len(nbInterp)):
-        for j in range(nbInterp[i]):
-            codeSave += str(i)+"-"
+    for i in range(len(featuresData)):
+        for _ in range(nbInterp[i]):
+            codeSave += str(featuresData[i])+"-"
     codeSave = codeSave[:-1]
     filename = "Data/"+folder+"/"+codeSave+"_"
     print("Save AlphaTr")

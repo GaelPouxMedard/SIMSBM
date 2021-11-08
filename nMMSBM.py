@@ -134,6 +134,7 @@ def writeToFile_params(folder, thetas, p, maxL, HOL, featToClus, popFeat, nbClus
             for i in featToClus:
                 codeT += str(nbClus[i])+"-"
             codeT = codeT[:-1]
+
             for i in range(len(thetas)):
                 writeMatrix(thetas[i], folderParams + "/T="+codeT+"_%.0f_" % (run)+s+"theta_"+str(i)+"_Inter_theta")
 
@@ -829,11 +830,11 @@ else:  # EXPERIMENTAL SETUP
             list_params = []
             list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
 
-            list_params.append(([2, 3], [1, 2], [1, 1], [10, 10], False, 0))
-            list_params.append(([2, 3], [1, 2], [1, 2], [10, 10], False, 0))
+            list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], False, 0))
+            list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
 
-            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], False, 0))  # Maybe too large
-            list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
+            list_params.append(([1, 3], [1, 2], [1, 1], [10, 8], False, 0))  # Maybe too large
+            list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
 
             list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
 
@@ -881,9 +882,9 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
     else:
         print("Get alphas")
         codeSave = ""
-        for i in range(len(DS)):
+        for i in range(len(features)):
             for j in range(DS[i]):
-                codeSave += str(i) + "-"
+                codeSave += str(features[i]) + "-"
         codeSave = codeSave[:-1]
         fname = "Data/"+folder+"/"+codeSave
         alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")

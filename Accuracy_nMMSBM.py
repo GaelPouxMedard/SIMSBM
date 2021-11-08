@@ -88,12 +88,11 @@ def readMatrix(filename):
     #return sparse.csr_matrix(new_data)
 
 
-def recoverData(folder, DS):
-
+def recoverData(folder, DS, features):
     strT = ""
     for f, interp in enumerate(DS):
         for i in range(interp):
-            strT+=str(f)+"-"
+            strT+=str(features[f])+"-"
     strT = strT[:-1]+"_"
     print(strT)
     alpha_Tr, alpha_Te = readMatrix("Data/" + folder + "/"+strT+"AlphaTr.npz"), readMatrix("Data/" + folder + "/"+strT+"AlphaTe.npz")
@@ -699,7 +698,7 @@ for index_params, list_params in enumerate(paramsDS):
             Baselines.run(folder, DS, features, nbClus, nbInterp, do_TF=do_TF)
 
         print("Import params")
-        alpha_Tr, alpha_Te = recoverData(folder, DS)
+        alpha_Tr, alpha_Te = recoverData(folder, DS, features)
         nbOut = alpha_Tr.shape[-1]
 
         probsMod = 0.
