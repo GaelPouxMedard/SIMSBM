@@ -718,24 +718,25 @@ for index_params, list_params in enumerate(paramsDS):
         tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut)
         print("\n\n")
         saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
-        allRes.append(tabMetricsAll)
 
-        firstPassage = True
-        for tabMetricsAll in allRes:
-            strRes = ""
-            for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
-                if firstPassage:
-                    strRes += "\t"
-                    for metric in tabMetricsAll[label]:
-                        strRes += metric+"\t"
-                    strRes += "\n"
-                    firstPassage = False
-                strRes += label+"\t"
+    allRes.append(tabMetricsAll)
+
+    firstPassage = True
+    for tabMetricsAll in allRes:
+        strRes = ""
+        for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
+            if firstPassage:
+                strRes += "\t"
                 for metric in tabMetricsAll[label]:
-                    strRes += "%.4f\t" % (tabMetricsAll[label][metric])
+                    strRes += metric+"\t"
                 strRes += "\n"
+                firstPassage = False
+            strRes += label+"\t"
+            for metric in tabMetricsAll[label]:
+                strRes += "%.4f\t" % (tabMetricsAll[label][metric])
+            strRes += "\n"
 
-            print(strRes.expandtabs(30))
+        print(strRes.expandtabs(30))
 
 pause()
 
