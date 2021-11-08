@@ -917,7 +917,7 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
 
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True)
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False)
 
 
 
