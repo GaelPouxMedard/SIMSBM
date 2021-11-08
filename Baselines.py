@@ -238,7 +238,7 @@ def MF(fname, D, coordsToInt):
         for c in coordsToInt:
             f.write(str(c) + "\t" + str(coordsToInt[c]) + "\n")
 
-def TF(DS, folder, nbClus, nbInterp):
+def TF(DS, folder, nbClus, nbInterp, features):
     from TensorDecomposition import run as runTD
 
     norm = 0.001
@@ -247,7 +247,7 @@ def TF(DS, folder, nbClus, nbInterp):
     #N = 2
     #print("================= REMOVE ME REMOVE ME REMOVE ME f° TF !!! =====================")
 
-    runTD(DS, folder, nbClus, nbInterp, norm, step, N)
+    runTD(DS, folder, nbClus, nbInterp, features, norm, step, N)
 
 def run(folder, DS, features, nbClusMod1, nbInterpMod1, do_TF=True):
     fname = getName(DS, nbInterpMod1, folder, features)
@@ -258,7 +258,7 @@ def run(folder, DS, features, nbClusMod1, nbInterpMod1, do_TF=True):
     MF(fname, D, coordsToInt)
     classifiers(fname, X, y)
     if do_TF:
-        TF(DS, folder, nbClusMod1, nbInterpMod1)
+        TF(DS, folder, nbClusMod1, nbInterpMod1, features)
 
 '''
 folder = "Spotify"

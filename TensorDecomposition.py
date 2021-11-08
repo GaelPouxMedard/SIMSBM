@@ -36,11 +36,11 @@ def readMatrix(filename):
 
     # return sparse.csr_matrix(new_data)
 
-def getName(DS, folder, nbClus, nbInterp):
+def getName(DS, folder, nbClus, nbInterp, features):
     codeSave = ""
     for i in range(len(DS)):
         for j in range(DS[i]):
-            codeSave += str(i) + "-"
+            codeSave += str(features[i]) + "-"
     codeSave = codeSave[:-1]
 
     codeSaveTF = ""
@@ -94,8 +94,8 @@ def moveRes(fname, params, codeClus):
     os.system(cmdUMv)
 
 
-def run(DS, folder, nbClus, nbInterp, norm, step, N):
-    fnameAlpha, codeClus, fname = getName(DS, folder, nbClus, nbInterp)
+def run(DS, folder, nbClus, nbInterp, features, norm, step, N):
+    fnameAlpha, codeClus, fname = getName(DS, folder, nbClus, nbInterp, features)
     print(fname)
 
     alphaTr, alphaTe = readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTr.npz"), readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTe.npz")
