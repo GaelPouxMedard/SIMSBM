@@ -46,7 +46,7 @@ def getName(DS, folder, nbClus, nbInterp, features):
     codeSaveTF = ""
     for i in range(len(DS)):
         for _ in range(nbInterp[i]):
-            codeSaveTF += str(DS[i]) + "-"
+            codeSaveTF += str(features[i]) + "-"
     codeSaveTF = codeSaveTF[:-1]
 
     featToClus = []
