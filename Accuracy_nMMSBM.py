@@ -400,7 +400,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
     for j, id in enumerate(IDsTe):
         if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, "%")
-        if j*100./lg>0.2 and False:
+        if j*100./lg>0.2 and True:
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
