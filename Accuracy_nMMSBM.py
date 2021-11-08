@@ -512,7 +512,6 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     tabK = list(dicTrue.keys())
     listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
         dicsToList(tabK, dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights)
-    print(nb, len(listWeights))
     print("Min coverage error:", np.average(np.sum(listTrue, axis=1), weights=listWeights)-1)
     print("#eval entries:", len(listTrue))
     return listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights
@@ -687,6 +686,7 @@ else:  # Experimental evaluation
         pass
 
 print(folder)
+allRes = []
 for index_params, list_params in enumerate(paramsDS):
     tabMetricsAll = {}
     for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
@@ -718,8 +718,11 @@ for index_params, list_params in enumerate(paramsDS):
         tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut)
         print("\n\n")
         saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
+        allRes.append(tabMetricsAll)
 
-
+for tabMetricsAll in allRes:
+    print(tabMetricsAll)
+    print()
 
 pause()
 
