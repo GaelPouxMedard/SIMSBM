@@ -648,6 +648,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
+            do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [7], False, 0))
             list_params.append(([0], [3], [2], [7], False, 0))
@@ -667,6 +668,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
+            do_TF = False
             list_params = []
             list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
             list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
@@ -690,7 +692,7 @@ for index_params, list_params in enumerate(paramsDS):
         print("Compute BL :", redoBL)
         if redoBL:
             import Baselines
-            Baselines.run(folder, DS, features, nbClus, nbInterp)
+            Baselines.run(folder, DS, features, nbClus, nbInterp, do_TF=do_TF)
 
         print("Import params")
         alpha_Tr, alpha_Te = recoverData(folder, DS)

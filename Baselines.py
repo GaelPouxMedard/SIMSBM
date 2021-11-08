@@ -249,7 +249,7 @@ def TF(DS, folder, nbClus, nbInterp):
 
     runTD(DS, folder, nbClus, nbInterp, norm, step, N)
 
-def run(folder, DS, features, nbClusMod1, nbInterpMod1):
+def run(folder, DS, features, nbClusMod1, nbInterpMod1, do_TF=True):
     fname = getName(DS, nbInterpMod1, folder)
     print(fname)
 
@@ -257,7 +257,8 @@ def run(folder, DS, features, nbClusMod1, nbInterpMod1):
 
     MF(fname, D, coordsToInt)
     classifiers(fname, X, y)
-    TF(DS, folder, nbClusMod1, nbInterpMod1)
+    if do_TF:
+        TF(DS, folder, nbClusMod1, nbInterpMod1)
 
 '''
 folder = "Spotify"
