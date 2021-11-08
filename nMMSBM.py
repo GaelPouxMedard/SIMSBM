@@ -827,15 +827,15 @@ else:  # EXPERIMENTAL SETUP
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
             nbRuns = 10
             list_params = []
-            list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
+            list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], True, 0))  # Antonia
 
-            list_params.append(([2, 3], [1, 2], [1, 1], [10, 10], False, 0))
+            list_params.append(([2, 3], [1, 2], [1, 1], [10, 10], True, 0))
             list_params.append(([2, 3], [1, 2], [1, 2], [10, 10], False, 0))
 
-            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], False, 0))  # Maybe too large
+            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], True, 0))  # Maybe too large
             list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
 
-            list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
+            list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], True, 0))
 
         if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
@@ -868,7 +868,7 @@ else:  # EXPERIMENTAL SETUP
         pass
 
 
-def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False):
+def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True):
     print("Reduction K", reductionK)
     print("Features", features)
     print("Structure", nbInterp)
