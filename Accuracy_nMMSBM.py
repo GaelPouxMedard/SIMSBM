@@ -721,9 +721,9 @@ for index_params, list_params in enumerate(paramsDS):
 
     allRes.append(tabMetricsAll)
 
-    firstPassage = True
     for tabMetricsAll in allRes:
         strRes = ""
+        firstPassage = True
         for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
             if firstPassage:
                 strRes += "\t"
@@ -736,7 +736,7 @@ for index_params, list_params in enumerate(paramsDS):
                 strRes += "%.4f\t" % (tabMetricsAll[label][metric])
             strRes += "\n"
 
-        print(strRes.expandtabs(15))
+        print(strRes.expandtabs(20))
 
 pause()
 
