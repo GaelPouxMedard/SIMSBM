@@ -458,8 +458,6 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             karray = np.array(k)
             nb+=1
 
-            print(k, karray, karray[inds], [tet.shape for tet in thetasMod], pMod.shape)
-
             tempProbBL.append(pBL)
             try:tempProbPF.append(pPF[tuple(karray[inds])])
             except:tempProbPF.append(np.zeros((nbOut)))
