@@ -736,7 +736,7 @@ for index_params, list_params in enumerate(paramsDS):
                 strRes += "%.4f\t" % (tabMetricsAll[label][metric])
             strRes += "\n"
 
-        print(strRes.expandtabs(30))
+        print(strRes.expandtabs(15))
 
 pause()
 
