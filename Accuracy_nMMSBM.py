@@ -361,8 +361,8 @@ def getElemProb(c, thetas, p, featToClus):
     return v
 
 
-def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, featToClus, nbInterp):
-    features, outcome, featToInt, outToInt, IDsTe = getDataTe(folder, features, DS, lim=1e20)
+def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, featToClus, nbInterp):
+    features, outcome, featToInt, outToInt, IDsTe = getDataTe(folder, featuresCons, DS, lim=1e20)
 
     inds = getIndsMod(DS, nbInterp)
 
@@ -386,10 +386,10 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
     print("Build PF")
     pPF = normalized(alpha_BL_Te, dicForm=True)
 
-    modKNN = loadModel(folder, DS, nbInterp, features, model="KNN")
-    modNB = loadModel(folder, DS, nbInterp, features, model="NB")
-    WNMF, HNMF, coordToInt = loadMF(folder, DS, nbInterp, features, model="NMF")
-    modU, modCore = loadTF(folder, DS, nbInterp, features, model="TF")
+    modKNN = loadModel(folder, DS, nbInterp, featuresCons, model="KNN")
+    modNB = loadModel(folder, DS, nbInterp, featuresCons, model="NB")
+    WNMF, HNMF, coordToInt = loadMF(folder, DS, nbInterp, featuresCons, model="NMF")
+    modU, modCore = loadTF(folder, DS, nbInterp, featuresCons, model="TF")
 
     nbOut = alpha_Te.shape[-1]
 
