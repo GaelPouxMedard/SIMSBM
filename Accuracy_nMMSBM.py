@@ -514,6 +514,7 @@ def buildArraysProbs(folder, features, DS, alpha, alphaTe, thetasMod, pMod, feat
         dicsToList(tabK, dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights)
     print(nb, len(listWeights))
     print("Min coverage error:", np.average(np.sum(listTrue, axis=1), weights=listWeights)-1)
+    print("#eval entries:", len(listTrue))
     return listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights
 
 #// endregion
@@ -668,7 +669,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
-            do_TF = False
+            #do_TF = False
             list_params = []
             list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
             list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
