@@ -398,116 +398,123 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
     nb=0
     index_obs = 0
     dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
-    for j, id in enumerate(IDsTe):
-        if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, f"% ({j}/{lg})")
-        if j*100./lg>0.2 and False:
-            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
-            break
 
-        if id not in outcome: continue
+    import pprofile
+    profiler = pprofile.Profile()
+    with profiler:
+        for j, id in enumerate(IDsTe):
+            if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, f"% ({j}/{lg})");print("REMOVE ME REMOVE ME");break
+            if j*100./lg>0.2 and False:
+                print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+                print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+                print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+                print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+                print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+                break
 
-        """
-        toProd = []
-        for i in range(len(features)):
-            for interp in range(DS[i]):
-                toProd.append(features[i][id])
-        listKeys = list(itertools.product(*toProd))
-        """
+            if id not in outcome: continue
 
-        toProd = []
-        for i in range(len(features)):
-            toProd.append(list(itertools.combinations(features[i][id], r=DS[i])))
-        #toProd.append(list(itertools.combinations(outcome[id], r=1)))
-        listKeys = list(itertools.product(*toProd))
-        if listKeys==[]: continue
+            """
+            toProd = []
+            for i in range(len(features)):
+                for interp in range(DS[i]):
+                    toProd.append(features[i][id])
+            listKeys = list(itertools.product(*toProd))
+            """
 
-        ''' Biased ; repeat evaluation several times for one document
-        for k in []:
-            karray = np.array(k)
-            nb+=1
-            if k not in dicTrue:
-                a=np.zeros((nbOut))
-                for o in outcome[id]:
-                    a[o] = 1
-                dicTrue[k] = a
+            toProd = []
+            for i in range(len(features)):
+                toProd.append(list(itertools.combinations(features[i][id], r=DS[i])))
+            #toProd.append(list(itertools.combinations(outcome[id], r=1)))
+            listKeys = list(itertools.product(*toProd))
+            if listKeys==[]: continue
 
-            if k not in dicProbBL: dicProbBL[k]=pBL
-            if k not in dicProbPF:
-                try:dicProbPF[k] = pPF[k]
-                except:dicProbPF[k] = np.zeros((nbOut))
-
-            if k not in dicProbMod1: dicProbMod1[k]=getElemProb(karray[indsMod1], thetasMod1, pMod1, featToClusMod1)
-            if k not in dicProbMod2: dicProbMod2[k]=getElemProb(karray[indsMod2], thetasMod2, pMod2, featToClusMod2)
-            if k not in dicProbMod3: dicProbMod3[k]=getElemProb(karray[indsMod3], thetasMod3, pMod3, featToClusMod3)
-            if k not in dicProbRand: dicProbRand[k]=np.random.random((nbOut))
-
-            if k not in dicWeights: dicWeights[k]=0
-            dicWeights[k]+=1
-        '''
-
-        a = np.zeros((nbOut))
-        for o in outcome[id]:
-            a[o] = 1
-            
-        tempProbMod, tempProbBL, tempProbPF, tempProbNMF, tempProbTF, tempProbKNN, tempProbNB, tempProbRand = [], [], [], [], [], [], [], []
-        for ktup in listKeys:
-            k = sum(ktup, ())
-            karray = np.array(k)
-            nb+=1
-
-            tempProbBL.append(pBL)
-            try:tempProbPF.append(pPF[tuple(karray[inds])])
-            except:tempProbPF.append(np.zeros((nbOut)))
-
-            # [inds] important car réduit le DS au modèle considéré
-            tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
-
-            try: tempProbNMF.append(WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF))
-            except: tempProbNMF.append(np.zeros((nbOut)))
-
-            tempProbTF.append(getProbTF(karray[inds], modU, modCore))
-
-            tempProbKNN.append(modKNN.predict_proba([karray[inds]])[0])
-            tempProbNB.append(modNB.predict_proba([karray[inds]])[0])
-
-            rnd = np.random.random((nbOut))
-            rnd/=np.sum(rnd)
-            tempProbRand.append(rnd)
-
-            dicTrue[index_obs] = a
-            dicProbMod[index_obs]=tempProbMod[-1]
-            dicProbPF[index_obs]=tempProbPF[-1]
-            dicProbBL[index_obs]=tempProbBL[-1]
-            dicProbNMF[index_obs]=tempProbNMF[-1]
-            dicProbTF[index_obs]=tempProbTF[-1]
-            dicProbKNN[index_obs]=tempProbKNN[-1]
-            dicProbNB[index_obs]=tempProbNB[-1]
-            dicProbRand[index_obs]=tempProbRand[-1]
+            ''' Biased ; repeat evaluation several times for one document
+            for k in []:
+                karray = np.array(k)
+                nb+=1
+                if k not in dicTrue:
+                    a=np.zeros((nbOut))
+                    for o in outcome[id]:
+                        a[o] = 1
+                    dicTrue[k] = a
     
-            if index_obs not in dicWeights: dicWeights[index_obs]=0
-            dicWeights[index_obs]+=1
+                if k not in dicProbBL: dicProbBL[k]=pBL
+                if k not in dicProbPF:
+                    try:dicProbPF[k] = pPF[k]
+                    except:dicProbPF[k] = np.zeros((nbOut))
+    
+                if k not in dicProbMod1: dicProbMod1[k]=getElemProb(karray[indsMod1], thetasMod1, pMod1, featToClusMod1)
+                if k not in dicProbMod2: dicProbMod2[k]=getElemProb(karray[indsMod2], thetasMod2, pMod2, featToClusMod2)
+                if k not in dicProbMod3: dicProbMod3[k]=getElemProb(karray[indsMod3], thetasMod3, pMod3, featToClusMod3)
+                if k not in dicProbRand: dicProbRand[k]=np.random.random((nbOut))
+    
+                if k not in dicWeights: dicWeights[k]=0
+                dicWeights[k]+=1
+            '''
 
-            index_obs += 1
+            a = np.zeros((nbOut))
+            for o in outcome[id]:
+                a[o] = 1
+
+            tempProbMod, tempProbBL, tempProbPF, tempProbNMF, tempProbTF, tempProbKNN, tempProbNB, tempProbRand = [], [], [], [], [], [], [], []
+            for ktup in listKeys:
+                k = sum(ktup, ())
+                karray = np.array(k)
+                nb+=1
+
+                tempProbBL.append(pBL)
+                try:tempProbPF.append(pPF[tuple(karray[inds])])
+                except:tempProbPF.append(np.zeros((nbOut)))
+
+                # [inds] important car réduit le DS au modèle considéré
+                tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
+
+                try: tempProbNMF.append(WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF))
+                except: tempProbNMF.append(np.zeros((nbOut)))
+
+                tempProbTF.append(getProbTF(karray[inds], modU, modCore))
+
+                tempProbKNN.append(modKNN.predict_proba([karray[inds]])[0])
+                tempProbNB.append(modNB.predict_proba([karray[inds]])[0])
+
+                rnd = np.random.random((nbOut))
+                rnd/=np.sum(rnd)
+                tempProbRand.append(rnd)
+
+                dicTrue[index_obs] = a
+                dicProbMod[index_obs]=tempProbMod[-1]
+                dicProbPF[index_obs]=tempProbPF[-1]
+                dicProbBL[index_obs]=tempProbBL[-1]
+                dicProbNMF[index_obs]=tempProbNMF[-1]
+                dicProbTF[index_obs]=tempProbTF[-1]
+                dicProbKNN[index_obs]=tempProbKNN[-1]
+                dicProbNB[index_obs]=tempProbNB[-1]
+                dicProbRand[index_obs]=tempProbRand[-1]
+
+                if index_obs not in dicWeights: dicWeights[index_obs]=0
+                dicWeights[index_obs]+=1
+
+                index_obs += 1
 
 
-        ''' # Si on veut average, mais c'est pas la meilleure option
-        dicTrue[j] = a
-        dicProbMod[j]=np.mean(tempProbMod, axis=0)
-        dicProbPF[j]=np.mean(tempProbPF, axis=0)
-        dicProbBL[j]=np.mean(tempProbBL, axis=0)
-        dicProbNMF[j]=np.mean(tempProbNMF, axis=0)
-        dicProbTF[j]=np.mean(tempProbTF, axis=0)
-        dicProbKNN[j]=np.mean(tempProbKNN, axis=0)
-        dicProbNB[j]=np.mean(tempProbNB, axis=0)
-        dicProbRand[j]=np.mean(tempProbRand, axis=0)
+            ''' # Si on veut average, mais c'est pas la meilleure option
+            dicTrue[j] = a
+            dicProbMod[j]=np.mean(tempProbMod, axis=0)
+            dicProbPF[j]=np.mean(tempProbPF, axis=0)
+            dicProbBL[j]=np.mean(tempProbBL, axis=0)
+            dicProbNMF[j]=np.mean(tempProbNMF, axis=0)
+            dicProbTF[j]=np.mean(tempProbTF, axis=0)
+            dicProbKNN[j]=np.mean(tempProbKNN, axis=0)
+            dicProbNB[j]=np.mean(tempProbNB, axis=0)
+            dicProbRand[j]=np.mean(tempProbRand, axis=0)
+    
+            if j not in dicWeights: dicWeights[j]=0
+            dicWeights[j]+=1
+            '''
+    profiler.print_stats()
+    profiler.dump_stats("Benchmark.txt")
 
-        if j not in dicWeights: dicWeights[j]=0
-        dicWeights[j]+=1
-        '''
 
     tabK = list(dicTrue.keys())
     listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
