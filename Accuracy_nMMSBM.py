@@ -467,7 +467,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
     tabK = list(dicTrue.keys())
     listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
         dicsToList(tabK, dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights)
-    print("Min coverage error:", np.average(np.sum(listTrue, axis=1), weights=listWeights)-1)
+    #print("Min coverage error:", np.average(np.sum(listTrue, axis=1), weights=listWeights)-1)
     print("#eval entries:", len(listTrue))
     return listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights
 
