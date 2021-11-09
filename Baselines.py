@@ -52,7 +52,7 @@ def getDataTr(folder, featuresData, DS, lim=1e20):
     strDS = ""
     for f, interp in enumerate(DS):
         for i in range(interp):
-            strDS+=str(f)+"-"
+            strDS+=str(featuresData[f])+"-"
     strDS = strDS[:-1]+"_"
     with open(folderName + "/"+strDS+"IDTr.txt") as f:
         IDsTr = f.read().replace("[", "").replace("]", "").split(", ")
