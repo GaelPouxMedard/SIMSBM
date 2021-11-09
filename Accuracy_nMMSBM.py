@@ -398,7 +398,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
     nb=0
     index_obs = 0
     dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
-
+    tempStoreProbKNN, tempStoreProbNB = {}, {}
     import pprofile
     profiler = pprofile.Profile()
     with profiler:
@@ -478,8 +478,10 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
 
                 tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
-                tempProbKNN.append(modKNN.predict_proba([karray[inds]])[0])
-                tempProbNB.append(modNB.predict_proba([karray[inds]])[0])
+                if karray[inds] not in tempStoreProbKNN: tempStoreProbKNN[karray[inds]] = modKNN.predict_proba([karray[inds]])[0]
+                if karray[inds] not in tempStoreProbNB: tempStoreProbNB[karray[inds]] = modNB.predict_proba([karray[inds]])[0]
+                tempProbKNN.append(tempStoreProbKNN[karray[inds]])
+                tempProbNB.append(tempStoreProbNB[karray[inds]])
 
                 rnd = np.random.random((nbOut))
                 rnd/=np.sum(rnd)
