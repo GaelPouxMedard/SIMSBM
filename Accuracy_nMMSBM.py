@@ -572,7 +572,6 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
-            do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [20], False, 2))
             list_params.append(([0], [3], [2], [20], False, 2))
