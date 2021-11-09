@@ -430,14 +430,19 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             nb+=1
 
             tempProbBL.append(pBL)
-            try:tempProbPF.append(pPF[tuple(karray[inds])])
-            except:tempProbPF.append(np.zeros((nbOut)))
+            try:
+                tempProbPF.append(pPF[tuple(karray[inds])])
+            except Exception as e:
+                tempProbPF.append(np.zeros((nbOut)));print(e)
 
             # [inds] important car réduit le DS au modèle considéré
             tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
 
-            try: tempProbNMF.append(WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF))
-            except: tempProbNMF.append(np.zeros((nbOut)))
+            try:
+                parr = WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF)
+                tempProbNMF.append(parr/sum(parr))
+            except Exception as e:
+                tempProbNMF.append(np.zeros((nbOut)));print(e)
 
             tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
@@ -482,9 +487,10 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     listWeights = np.append(listWeights, 1e-10)
     if label not in tabMetricsAll: tabMetricsAll[label]={}
     print(f"Scores {label}")
+
     tabMetricsAll[label]["F1"], tabMetricsAll[label]["Acc"] = 0, 0
     for thres in np.linspace(0, 1, 101):
-        F1 = metrics.f1_score(listTrue, (listProbs>thres).astype(int), average="weighted", sample_weight=listWeights)
+        F1 = metrics.f1_score(listTrue, (listProbs>thres).astype(int), average="macro", sample_weight=listWeights)
         acc = metrics.accuracy_score(listTrue, (listProbs>thres).astype(int), sample_weight=listWeights)
         if F1 > tabMetricsAll[label]["F1"]:
             tabMetricsAll[label]["F1"] = F1
@@ -496,12 +502,12 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     trueTopK = np.array([listTrue[i][topk[i]] for i in range(len(listTrue))])
     probsTopK = np.array([np.ones((len(topk[i]))) for i in range(len(listProbs))])
     if k>=2:
-        tabMetricsAll[label][f"P@{k}"] = metrics.precision_score(trueTopK, probsTopK, average="weighted", sample_weight=listWeights)
+        tabMetricsAll[label][f"P@{k}"] = metrics.precision_score(trueTopK, probsTopK, average="macro", sample_weight=listWeights)
     else:
         tabMetricsAll[label][f"P@{k}"] = np.average(trueTopK, weights=listWeights, axis=0)[0]
 
-    tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
-    tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
+    tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="macro", sample_weight=listWeights)
+    tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="macro", sample_weight=listWeights)
     tabMetricsAll[label]["RankAvgPrec"] = metrics.label_ranking_average_precision_score(listTrue, listProbs, sample_weight=listWeights)
     c=metrics.coverage_error(listTrue, listProbs, sample_weight=listWeights)
     tabMetricsAll[label]["CovErr"] = c-1
@@ -560,7 +566,7 @@ if False:  # "UI"
 else:  # Experimental evaluation
     try:
         folder=sys.argv[1]
-        #folder="Spotify"
+        #folder="Spotify";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
         # Features, DS, nbInterp, nbClus, buildData, seuil
         paramsDS = []
         if "pubmed" in folder.lower():
@@ -572,10 +578,11 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
+            #do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [20], False, 2))
-            list_params.append(([0], [3], [2], [20], False, 2))
-            list_params.append(([0], [3], [3], [20], False, 2))
+            #list_params.append(([0], [3], [2], [20], False, 2))
+            #list_params.append(([0], [3], [3], [20], False, 2))
             paramsDS.append(list_params)
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
