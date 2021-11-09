@@ -478,10 +478,10 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
 
                 tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
-                if str(karray[inds]) not in tempStoreProbKNN: tempStoreProbKNN[str(karray[inds])] = modKNN.predict_proba([karray[inds]])[0]
-                if str(karray[inds]) not in tempStoreProbNB: tempStoreProbNB[str(karray[inds])] = modNB.predict_proba([karray[inds]])[0]
-                tempProbKNN.append(tempStoreProbKNN[str(karray[inds])])
-                tempProbNB.append(tempStoreProbNB[str(karray[inds])])
+                if tuple(karray[inds]) not in tempStoreProbKNN: tempStoreProbKNN[tuple(karray[inds])] = modKNN.predict_proba([karray[inds]])[0]
+                if tuple(karray[inds]) not in tempStoreProbNB: tempStoreProbNB[tuple(karray[inds])] = modNB.predict_proba([karray[inds]])[0]
+                tempProbKNN.append(tempStoreProbKNN[tuple(karray[inds])])
+                tempProbNB.append(tempStoreProbNB[tuple(karray[inds])])
 
                 rnd = np.random.random((nbOut))
                 rnd/=np.sum(rnd)
