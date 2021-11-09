@@ -670,7 +670,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
-            #do_TF = False
+            do_TF = False
             list_params = []
             list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
             list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
