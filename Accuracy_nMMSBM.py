@@ -483,7 +483,7 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     print(f"Scores {label}")
     tabMetricsAll[label]["F1"], tabMetricsAll[label]["Acc"] = 0, 0
     for thres in np.linspace(0, 1, 101):
-        F1 = metrics.f1_score(listTrue, (listProbs>thres).astype(int), average="weighted", sample_weight=listWeights)
+        F1 = metrics.f1_score(listTrue, (listProbs>thres).astype(int), average="micro", sample_weight=listWeights)
         acc = metrics.accuracy_score(listTrue, (listProbs>thres).astype(int), sample_weight=listWeights)
         if F1 > tabMetricsAll[label]["F1"]:
             tabMetricsAll[label]["F1"] = F1
@@ -495,12 +495,12 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     trueTopK = np.array([listTrue[i][topk[i]] for i in range(len(listTrue))])
     probsTopK = np.array([np.ones((len(topk[i]))) for i in range(len(listProbs))])
     if k>=2:
-        tabMetricsAll[label][f"P@{k}"] = metrics.precision_score(trueTopK, probsTopK, average="weighted", sample_weight=listWeights)
+        tabMetricsAll[label][f"P@{k}"] = metrics.precision_score(trueTopK, probsTopK, average="micro", sample_weight=listWeights)
     else:
         tabMetricsAll[label][f"P@{k}"] = np.average(trueTopK, weights=listWeights, axis=0)[0]
 
-    tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
-    tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
+    tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="micro", sample_weight=listWeights)
+    tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="micro", sample_weight=listWeights)
     tabMetricsAll[label]["RankAvgPrec"] = metrics.label_ranking_average_precision_score(listTrue, listProbs, sample_weight=listWeights)
     c=metrics.coverage_error(listTrue, listProbs, sample_weight=listWeights)
     tabMetricsAll[label]["CovErr"] = c-1
