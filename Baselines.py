@@ -54,6 +54,7 @@ def getDataTr(folder, featuresData, DS, lim=1e20):
         for i in range(interp):
             strDS+=str(featuresData[f])+"-"
     strDS = strDS[:-1]+"_"
+
     with open(folderName + "/"+strDS+"IDTr.txt") as f:
         IDsTr = f.read().replace("[", "").replace("]", "").split(", ")
         IDsTr = np.array(IDsTr, dtype=int)
