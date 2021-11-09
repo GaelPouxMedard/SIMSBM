@@ -203,6 +203,7 @@ def loadTF(folder, DS, nbInterp, features, model="TF"):
     strT = strT[:-1]
 
     filename = f"Output/{folder}/" + strT + f"_{model}_"
+    print(filename)
     modU = np.load(f"{filename}U.npy", allow_pickle=True)
     modCore = np.load(f"{filename}core.npy", allow_pickle=True)
 
