@@ -401,9 +401,6 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
     tempStoreProbKNN, tempStoreProbNB = {}, {}
     for j, id in enumerate(IDsTe):
         if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, f"% ({j}/{lg})")
-        if j>200:
-            print("REMOVE ME REMOVE ME")
-            break
         if j*100./lg>0.2 and False:
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
@@ -414,44 +411,12 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
 
         if id not in outcome: continue
 
-        """
-        toProd = []
-        for i in range(len(features)):
-            for interp in range(DS[i]):
-                toProd.append(features[i][id])
-        listKeys = list(itertools.product(*toProd))
-        """
-
         toProd = []
         for i in range(len(features)):
             toProd.append(list(itertools.combinations(features[i][id], r=DS[i])))
         #toProd.append(list(itertools.combinations(outcome[id], r=1)))
         listKeys = list(itertools.product(*toProd))
         if listKeys==[]: continue
-
-        ''' Biased ; repeat evaluation several times for one document
-        for k in []:
-            karray = np.array(k)
-            nb+=1
-            if k not in dicTrue:
-                a=np.zeros((nbOut))
-                for o in outcome[id]:
-                    a[o] = 1
-                dicTrue[k] = a
-
-            if k not in dicProbBL: dicProbBL[k]=pBL
-            if k not in dicProbPF:
-                try:dicProbPF[k] = pPF[k]
-                except:dicProbPF[k] = np.zeros((nbOut))
-
-            if k not in dicProbMod1: dicProbMod1[k]=getElemProb(karray[indsMod1], thetasMod1, pMod1, featToClusMod1)
-            if k not in dicProbMod2: dicProbMod2[k]=getElemProb(karray[indsMod2], thetasMod2, pMod2, featToClusMod2)
-            if k not in dicProbMod3: dicProbMod3[k]=getElemProb(karray[indsMod3], thetasMod3, pMod3, featToClusMod3)
-            if k not in dicProbRand: dicProbRand[k]=np.random.random((nbOut))
-
-            if k not in dicWeights: dicWeights[k]=0
-            dicWeights[k]+=1
-        '''
 
         a = np.zeros((nbOut))
         for o in outcome[id]:
@@ -698,43 +663,34 @@ allRes = []
 for index_params, list_params in enumerate(paramsDS):
     tabMetricsAll = {}
     for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
+        print("Compute BL :", redoBL)
+        if redoBL:
+            import Baselines
+            Baselines.run(folder, DS, features, nbClus, nbInterp, do_TF=do_TF)
 
-        import pprofile
-        profiler = pprofile.Profile()
-        with profiler:
+        print("Import params")
+        alpha_Tr, alpha_Te = recoverData(folder, DS, features)
+        nbOut = alpha_Tr.shape[-1]
 
-            print("Compute BL :", redoBL)
-            if redoBL:
-                import Baselines
-                Baselines.run(folder, DS, features, nbClus, nbInterp, do_TF=do_TF)
-
-            print("Import params")
-            alpha_Tr, alpha_Te = recoverData(folder, DS, features)
-            nbOut = alpha_Tr.shape[-1]
-
-            probsMod = 0.
-            thetasMod, pMod, featToClus, popFeat = recoverParams(folder, nbClus, nbInterp, final=final, run=run)
+        probsMod = 0.
+        thetasMod, pMod, featToClus, popFeat = recoverParams(folder, nbClus, nbInterp, final=final, run=run)
 
 
-            print("Build probs")
-            listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
-                buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, thetasMod, pMod, featToClus, nbInterp)
+        print("Build probs")
+        listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
+            buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, thetasMod, pMod, featToClus, nbInterp)
 
-            print("Compute metrics")
-            tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut)
-            tabMetricsAll = scores(listTrue, listProbNMF, listWeights, f"NMF_{nbInterp}", tabMetricsAll, nbOut)
-            tabMetricsAll = scores(listTrue, listProbKNN, listWeights, f"KNN_{nbInterp}", tabMetricsAll, nbOut)
-            tabMetricsAll = scores(listTrue, listProbNB, listWeights, f"NB_{nbInterp}", tabMetricsAll, nbOut)
-            tabMetricsAll = scores(listTrue, listProbMod, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut)
-            tabMetricsAll = scores(listTrue, listProbBL, listWeights, f"BL_{nbInterp}", tabMetricsAll, nbOut)
-            tabMetricsAll = scores(listTrue, listProbPF, listWeights, f"PF_{nbInterp}", tabMetricsAll, nbOut)
-            tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut)
-            print("\n\n")
-            saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
-
-        profiler.print_stats()
-        profiler.dump_stats("Benchmark.txt")
-
+        print("Compute metrics")
+        tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbNMF, listWeights, f"NMF_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbKNN, listWeights, f"KNN_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbNB, listWeights, f"NB_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbMod, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbBL, listWeights, f"BL_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbPF, listWeights, f"PF_{nbInterp}", tabMetricsAll, nbOut)
+        tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut)
+        print("\n\n")
+        saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
 
     allRes.append(tabMetricsAll)
 
