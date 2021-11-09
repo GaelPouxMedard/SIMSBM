@@ -403,7 +403,10 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
     profiler = pprofile.Profile()
     with profiler:
         for j, id in enumerate(IDsTe):
-            if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, f"% ({j}/{lg})");print("REMOVE ME REMOVE ME");break
+            if j % (lg//10) == 0: print("Build list probs", j * 100. / lg, f"% ({j}/{lg})")
+            if j>200:
+                print("REMOVE ME REMOVE ME")
+                break
             if j*100./lg>0.2 and False:
                 print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
                 print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
