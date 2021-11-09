@@ -464,22 +464,6 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
 
             index_obs += 1
 
-
-        ''' # Si on veut average, mais c'est pas la meilleure option
-        dicTrue[j] = a
-        dicProbMod[j]=np.mean(tempProbMod, axis=0)
-        dicProbPF[j]=np.mean(tempProbPF, axis=0)
-        dicProbBL[j]=np.mean(tempProbBL, axis=0)
-        dicProbNMF[j]=np.mean(tempProbNMF, axis=0)
-        dicProbTF[j]=np.mean(tempProbTF, axis=0)
-        dicProbKNN[j]=np.mean(tempProbKNN, axis=0)
-        dicProbNB[j]=np.mean(tempProbNB, axis=0)
-        dicProbRand[j]=np.mean(tempProbRand, axis=0)
-
-        if j not in dicWeights: dicWeights[j]=0
-        dicWeights[j]+=1
-        '''
-
     tabK = list(dicTrue.keys())
     listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
         dicsToList(tabK, dicTrue, dicProbMod, dicProbBL, dicProbPF, dicProbNMF, dicProbTF, dicProbKNN, dicProbNB, dicProbRand, dicWeights)
