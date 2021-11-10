@@ -652,7 +652,6 @@ else:  # Experimental evaluation
 
         if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
-            do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [10], False, 10))
             list_params.append(([0], [3], [2], [10], False, 10))
