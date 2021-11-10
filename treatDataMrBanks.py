@@ -60,7 +60,7 @@ with open("Data/MrBanks/outcome.txt", "a", encoding="utf-8") as o:
                                 prevExpGuess=exp_guess
                                 key = key[1:5]
                                 if key[-2]=='0':
-                                    key[-1]="-"
+                                    key = key[:-1]+"-"
                                 setkey.add(key)
                                 keyPrev = key
 
