@@ -21,7 +21,11 @@ with open("Data/MrBanks/outcome.txt", "a", encoding="utf-8") as o:
                             prevExp = None
                             prevExpGuess = None
                             keyPrev = None
+                            fst = True
                             for line in f:
+                                if fst:
+                                    fst=False
+                                    continue
                                 id, round, user, decision, market, result, exp, exp_guess, information_consulted, key, gender, experiment, _, _, age = line.replace("\n", "").split("\t")
 
                                 if user==prevUsr and experiment==prevExperiment:
