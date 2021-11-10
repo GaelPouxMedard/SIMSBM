@@ -70,7 +70,6 @@ def writeAlphaTF(fname, alphaTr):
     alphaNorm = normalized(alphaTr)
     d = alphaNorm.data
     print("LONGUEUR TRAINING DATA", len(d))
-    print(alphaTr)
     with open(fname+"_MatrixTF.txt", "a") as f:
         f.truncate(0)
         for i, c in enumerate(zip(*alphaNorm.nonzero())):
@@ -109,9 +108,7 @@ def run(DS, folder, nbClus, nbInterp, features, norm, step, N):
                 toRem.append(t)
         ind += DS[i]
     if len(toRem)!=0:
-        print(2, alphaTr)
         alphaTr = alphaTr.sum(toRem)
-        print(3, alphaTr)
         alphaTe = alphaTe.sum(toRem)
 
     codeClus += f"-{np.min([20, int(list(alphaTr.shape)[-1])])}"  # Clusters pour l'output
