@@ -1,5 +1,5 @@
 
-
+setkey = set()
 with open("Data/MrBanks/outcome.txt", "a", encoding="utf-8") as o:
     o.truncate(0)
     with open("Data/MrBanks/feature_0.txt", "a", encoding="utf-8") as f1:
@@ -61,6 +61,8 @@ with open("Data/MrBanks/outcome.txt", "a", encoding="utf-8") as o:
                                 key = key[1:5]
                                 if key[-2]==0:
                                     key[-1]="-"
+                                setkey.add(key)
                                 keyPrev = key
 
+print(setkey)
 
