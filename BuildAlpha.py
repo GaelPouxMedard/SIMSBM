@@ -369,6 +369,7 @@ def reduceAlpha(seuil, alphaTr, alphaTe, nbInterp, featToInt, outToInt):
         except:
             pass
 
+    print("New alpha:", newAlphaTr)
     return newAlphaTr, newAlphaTe, newNewFeatToInt, newNewOutToInt
 
 def run(folder, nbInterp, featuresData, propTrainingSet, lim=0, seuil=0):
