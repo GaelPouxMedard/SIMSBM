@@ -633,7 +633,12 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
-            do_TF = False
+            do_TF = True
+            list_params = []
+            list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
+            paramsDS.append(list_params)
+
+            '''
             list_params = []
             list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
             list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
@@ -645,6 +650,7 @@ else:  # Experimental evaluation
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
             paramsDS.append(list_params)
+            '''
 
     except Exception as e:
         print(e)

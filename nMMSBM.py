@@ -857,9 +857,8 @@ else:  # EXPERIMENTAL SETUP
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
             list_params = []
-            list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], True, 0))  # Complex decision making...
+            list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
 
-            '''
             list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
             list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
             list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
@@ -867,7 +866,7 @@ else:  # EXPERIMENTAL SETUP
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 1, 1, 1], [5, 5, 3, 3], False, 0))
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
-            '''
+
 
     except Exception as e:
         print(e)
@@ -937,12 +936,6 @@ with profiler:
 profiler.dump_stats("BenchmarkSparse.txt")
 #profiler.print_stats()
 pause()
-
-
-
-
-
-
 
 
 
