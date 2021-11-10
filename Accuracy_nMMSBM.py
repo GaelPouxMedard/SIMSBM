@@ -581,8 +581,8 @@ else:  # Experimental evaluation
             #do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [20], False, 2))
-            #list_params.append(([0], [3], [2], [20], False, 2))
-            #list_params.append(([0], [3], [3], [20], False, 2))
+            list_params.append(([0], [3], [2], [20], False, 2))
+            list_params.append(([0], [3], [3], [20], False, 2))
             paramsDS.append(list_params)
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
@@ -599,13 +599,13 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
 
             list_params = []
-            list_params.append(([2, 3], [1, 2], [1, 1], [10, 10], False, 0))
-            list_params.append(([2, 3], [1, 2], [1, 2], [10, 10], False, 0))
+            list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], False, 0))
+            list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
             paramsDS.append(list_params)
 
             list_params = []
-            list_params.append(([1, 3], [1, 2], [1, 1], [10, 10], False, 0))  # Maybe too large
-            list_params.append(([1, 3], [1, 2], [1, 2], [10, 10], False, 0))
+            list_params.append(([1, 3], [1, 2], [1, 1], [10, 8], False, 0))  # Maybe too large
+            list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
             paramsDS.append(list_params)
 
             list_params = []
