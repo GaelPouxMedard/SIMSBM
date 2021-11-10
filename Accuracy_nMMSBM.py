@@ -580,9 +580,9 @@ else:  # Experimental evaluation
             # 0 = artists  ;  o = next artist
             #do_TF = False
             list_params = []
-            list_params.append(([0], [3], [1], [20], False, 2))
-            list_params.append(([0], [3], [2], [20], False, 2))
-            list_params.append(([0], [3], [3], [20], False, 2))
+            list_params.append(([0], [3], [1], [20], False, 1))
+            list_params.append(([0], [3], [2], [20], False, 1))
+            list_params.append(([0], [3], [3], [20], False, 1))
             paramsDS.append(list_params)
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
