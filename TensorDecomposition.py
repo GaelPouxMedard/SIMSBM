@@ -70,6 +70,7 @@ def writeAlphaTF(fname, alphaTr):
     alphaNorm = normalized(alphaTr)
     d = alphaNorm.data
     print("LONGUEUR TRAINING DATA", len(d))
+    print(alphaTr)
     with open(fname+"_MatrixTF.txt", "a") as f:
         f.truncate(0)
         for i, c in enumerate(zip(*alphaNorm.nonzero())):
@@ -100,6 +101,7 @@ def run(DS, folder, nbClus, nbInterp, features, norm, step, N):
     print(fname)
 
     alphaTr, alphaTe = readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTr.npz"), readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTe.npz")
+    print(alphaTr)
 
     toRem, ind = [], 0
     for i in range(len(DS)):
