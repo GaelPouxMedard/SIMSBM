@@ -62,7 +62,7 @@ with open("Data/Dota/Raw/dota2Train.csv", encoding="utf-8") as f:
             tabHeroesTeam.append(heroesTeam)
             tabHeroesOpp.append(heroesOpp)
 
-thres = 4000
+thres = 8000
 
 with open("Data/Dota/outcome.txt", "w+", encoding="utf-8") as o:
     with open("Data/Dota/feature_0.txt", "w+", encoding="utf-8") as f1:

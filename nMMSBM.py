@@ -861,14 +861,14 @@ else:  # EXPERIMENTAL SETUP
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
             list_params = []
-            list_params.append(([0], [3], [1], [20], True, 2))
-            list_params.append(([0], [3], [2], [20], False, 2))
-            list_params.append(([0], [3], [3], [20], False, 2))
+            list_params.append(([0], [3], [1], [20], True, 1))
+            list_params.append(([0], [3], [2], [20], False, 1))
+            list_params.append(([0], [3], [3], [20], False, 1))
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             nbRuns = 10
             list_params = []
-            list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], False, 0))
+            list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], True, 0))
             list_params.append(([0, 1], [3, 3], [2, 2], [5, 5], False, 0))
             list_params.append(([0, 1], [3, 3], [3, 3], [5, 5], False, 0))
         if "imdb" in folder.lower():
@@ -927,7 +927,7 @@ else:  # EXPERIMENTAL SETUP
         pass
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False)
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True)
 
 
 
