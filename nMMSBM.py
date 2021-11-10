@@ -867,6 +867,13 @@ else:  # EXPERIMENTAL SETUP
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
 
+        if "twitter" in folder.lower():
+            # 0 = history tweets ;  o = retweet
+            list_params = []
+            list_params.append(([0], [3], [1], [10], True, 0))
+            list_params.append(([0], [3], [2], [10], False, 0))
+            list_params.append(([0], [3], [3], [10], False, 0))
+
 
     except Exception as e:
         print(e)
