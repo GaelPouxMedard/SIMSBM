@@ -69,6 +69,7 @@ def getName(DS, folder, nbClus, nbInterp, features):
 def writeAlphaTF(fname, alphaTr):
     alphaNorm = normalized(alphaTr)
     d = alphaNorm.data
+    print("LONGUEUR TRAINING DATA", len(d))
     with open(fname+"_MatrixTF.txt", "a") as f:
         f.truncate(0)
         for i, c in enumerate(zip(*alphaNorm.nonzero())):
