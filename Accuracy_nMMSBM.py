@@ -497,7 +497,7 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
         if acc > tabMetricsAll[label]["Acc"]:
             tabMetricsAll[label]["Acc"] = acc
 
-    k = 3  # Si k=1, sklearn considère les 0 et 1 comme des classes, mais de fait on prédit jamais 0 dans un P@k...
+    k = 1  # Si k=1, sklearn considère les 0 et 1 comme des classes, mais de fait on prédit jamais 0 dans un P@k...
     topk = np.argpartition(listProbs, -k, axis=1)[:, -k:]
     trueTopK = np.array([listTrue[i][topk[i]] for i in range(len(listTrue))])
     probsTopK = np.array([np.ones((len(topk[i]))) for i in range(len(listProbs))])
