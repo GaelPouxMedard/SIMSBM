@@ -917,7 +917,7 @@ else:  # EXPERIMENTAL SETUP
         if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
             list_params = []
-            list_params.append(([0], [3], [1], [10], True, 10))
+            list_params.append(([0], [3], [1], [10], False, 10))
             list_params.append(([0], [3], [2], [10], False, 10))
             list_params.append(([0], [3], [3], [10], False, 10))
 
@@ -927,7 +927,7 @@ else:  # EXPERIMENTAL SETUP
         pass
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True)
+    runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False)
 
 
 
