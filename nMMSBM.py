@@ -861,7 +861,7 @@ else:  # EXPERIMENTAL SETUP
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
             list_params = []
-            list_params.append(([0], [3], [1], [20], True, 1))
+            list_params.append(([0], [3], [1], [20], False, 1))
             list_params.append(([0], [3], [2], [20], False, 1))
             list_params.append(([0], [3], [3], [20], False, 1))
         if "dota" in folder.lower():
@@ -916,9 +916,9 @@ else:  # EXPERIMENTAL SETUP
         if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
             list_params = []
-            list_params.append(([0], [3], [1], [10], False, 10))
-            list_params.append(([0], [3], [2], [10], False, 10))
-            list_params.append(([0], [3], [3], [10], False, 10))
+            list_params.append(([0], [3], [1], [10], True, 5))
+            list_params.append(([0], [3], [2], [10], False, 5))
+            list_params.append(([0], [3], [3], [10], False, 5))
 
 
     except Exception as e:
