@@ -101,7 +101,6 @@ def run(DS, folder, nbClus, nbInterp, features, norm, step, N):
     print(fname)
 
     alphaTr, alphaTe = readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTr.npz"), readMatrix(fnameAlpha.replace("Output", "Data")+"_AlphaTe.npz")
-    print(1, alphaTr)
 
     toRem, ind = [], 0
     for i in range(len(DS)):
