@@ -365,6 +365,8 @@ def getElemProb(c, thetas, p, featToClus):
 
 def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, featToClus, nbInterp):
     features, outcome, featToInt, outToInt, IDsTe = getDataTe(folder, featuresCons, DS, lim=1e20)
+    print(features, featuresCons, DS, nbInterp)
+    pause()
 
     inds = getIndsMod(DS, nbInterp)
 
