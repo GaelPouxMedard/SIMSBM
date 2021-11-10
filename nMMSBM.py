@@ -710,6 +710,53 @@ def runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reduction
             print("######saved####### MAX L =", L)
         print("=============================== END EM ==========================")
 
+def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False):
+    print("Reduction K", reductionK)
+    print("Features", features)
+    print("Structure", nbInterp)
+    print("DS", DS)
+
+    if buildData:
+        print("Build alphas")
+        import BuildAlpha
+        alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
+    else:
+        print("Get alphas")
+        codeSave = ""
+        for i in range(len(features)):
+            for j in range(DS[i]):
+                codeSave += str(features[i]) + "-"
+        codeSave = codeSave[:-1]
+        fname = "Data/"+folder+"/"+codeSave
+        alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
+
+    if onlyBuildDS:
+        return 0
+    print("Alpha:", len(alpha_Tr.data), alpha_Tr)
+
+
+
+    toRem, ind = [], 0
+    for i in range(len(DS)):
+        if DS[i] != nbInterp[i]:
+            for t in range(ind, ind+DS[i]-nbInterp[i]):
+                toRem.append(t)
+        ind += DS[i]
+    if len(toRem)!=0:
+        alpha_Tr = alpha_Tr.sum(toRem)
+        alpha_Te = alpha_Te.sum(toRem)
+
+    if not sparseMatrices:
+        try:
+            alpha_Tr=alpha_Tr.todense()
+            alpha_Te=alpha_Te.todense()
+        except:
+            sparseMatrices=True
+            print("=============== SWITCH TO SPARSE =================")
+
+    runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK, features)
+
+
 
 # Run the algorithm with command line parameters or not
 # TreatData = do you want to redo the entire corpus from raw data
@@ -870,62 +917,14 @@ else:  # EXPERIMENTAL SETUP
         if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
             list_params = []
-            list_params.append(([0], [3], [1], [10], True, 0))
-            list_params.append(([0], [3], [2], [10], False, 0))
-            list_params.append(([0], [3], [3], [10], False, 0))
+            list_params.append(([0], [3], [1], [10], True, 10))
+            list_params.append(([0], [3], [2], [10], False, 10))
+            list_params.append(([0], [3], [3], [10], False, 10))
 
 
     except Exception as e:
         print(e)
         pass
-
-
-def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=False):
-    print("Reduction K", reductionK)
-    print("Features", features)
-    print("Structure", nbInterp)
-    print("DS", DS)
-
-    if buildData:
-        print("Build alphas")
-        import BuildAlpha
-        alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
-    else:
-        print("Get alphas")
-        codeSave = ""
-        for i in range(len(features)):
-            for j in range(DS[i]):
-                codeSave += str(features[i]) + "-"
-        codeSave = codeSave[:-1]
-        fname = "Data/"+folder+"/"+codeSave
-        alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
-
-    if onlyBuildDS:
-        return 0
-    print("Alpha:", len(alpha_Tr.data), alpha_Tr)
-
-
-
-    toRem, ind = [], 0
-    for i in range(len(DS)):
-        if DS[i] != nbInterp[i]:
-            for t in range(ind, ind+DS[i]-nbInterp[i]):
-                toRem.append(t)
-        ind += DS[i]
-    if len(toRem)!=0:
-        alpha_Tr = alpha_Tr.sum(toRem)
-        alpha_Te = alpha_Te.sum(toRem)
-
-    if not sparseMatrices:
-        try:
-            alpha_Tr=alpha_Tr.todense()
-            alpha_Te=alpha_Te.todense()
-        except:
-            sparseMatrices=True
-            print("=============== SWITCH TO SPARSE =================")
-
-    runFit(alpha_Tr, alpha_Te, nbClus, nbInterp, prec, nbRuns, maxCnt, reductionK, features)
-
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
     runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt, reductionK, sparseMatrices, onlyBuildDS=True)
