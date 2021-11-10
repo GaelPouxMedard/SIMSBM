@@ -365,8 +365,6 @@ def getElemProb(c, thetas, p, featToClus):
 
 def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, featToClus, nbInterp):
     features, outcome, featToInt, outToInt, IDsTe = getDataTe(folder, featuresCons, DS, lim=1e20)
-    print(features, featuresCons, DS, nbInterp)
-    pause()
 
     inds = getIndsMod(DS, nbInterp)
 
@@ -635,7 +633,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
-            do_TF = False
+            do_TF = True
             list_params = []
             list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
             paramsDS.append(list_params)
