@@ -1,6 +1,5 @@
-import TP1
 
-
+'''
 preTreat=False
 
 if preTreat:
@@ -218,7 +217,7 @@ if tweetsSsAds:
                 i+=1
                 if i>10000000:
                     pass
-
+'''
 
 
 def saveData(folder, g, nounsPost):
@@ -362,6 +361,7 @@ def epurate(intervals):
 
     return intervals
 
+
 def retreat(folder):
     twUsr, histUsr = getCorpus()
     g, intervals = getContentPosts(twUsr, histUsr)
@@ -370,3 +370,18 @@ def retreat(folder):
     g=TP1.Graph(g)
     saveData("Data/" + folder + "/", g, intervals)
 
+
+def treatForNMMSBM():
+    with open("Data/Twitter/nounsPost.txt", "r", encoding="utf-8") as f_raw:
+        with open("Data/Twitter/outcome.txt", "a", encoding="utf-8") as o:
+            o.truncate(0)
+            with open("Data/Twitter/feature_0.txt", "a", encoding="utf-8") as f1:
+                f1.truncate(0)
+                for line in f_raw:
+                    u, inf = line.replace("\n", "").split("\t")
+                    if u[0] == "-":
+                        f1.write(u[1:]+"\t"+inf+"\n")
+                    else:
+                        o.write(u+"\t"+inf+"\n")
+
+treatForNMMSBM()
