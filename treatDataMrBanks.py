@@ -58,6 +58,9 @@ with open("Data/MrBanks/outcome.txt", "a", encoding="utf-8") as o:
                                 prevRes=result
                                 prevExp=exp
                                 prevExpGuess=exp_guess
+                                key = key[1:5]
+                                if key[-2]==0:
+                                    key[-1]="-"
                                 keyPrev = key
 
 
