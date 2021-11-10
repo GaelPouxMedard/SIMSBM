@@ -916,9 +916,9 @@ else:  # EXPERIMENTAL SETUP
         if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
             list_params = []
-            list_params.append(([0], [3], [1], [10], True, 3))
-            list_params.append(([0], [3], [2], [10], False, 3))
-            list_params.append(([0], [3], [3], [10], False, 3))
+            list_params.append(([0], [3], [1], [10], True, 1))
+            list_params.append(([0], [3], [2], [10], False, 1))
+            list_params.append(([0], [3], [3], [10], False, 1))
 
 
     except Exception as e:
