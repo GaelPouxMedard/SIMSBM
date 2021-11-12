@@ -405,5 +405,7 @@ def treatForNMMSBM():
                         f1.write(u[1:]+"\t"+inf+"\n")
                     elif u[0] != "-" and nbOccRetweet[inf_i]>thresOutput:
                         o.write(u+"\t"+inf+"\n")
+    print(nbOccTweet)
+    print(nbOccRetweet)
 
 treatForNMMSBM()
