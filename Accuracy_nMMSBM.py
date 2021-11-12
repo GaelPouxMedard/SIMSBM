@@ -484,6 +484,10 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
 def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     listTrue = np.vstack((listTrue, np.ones((nbOut))))  # Pour eviter qu'une classe n'ait aucun ex negatif ; prendre la moyenne weighted si on utilise ca !
     listProbs = np.vstack((listProbs, np.ones((nbOut))))
+    nanmask = np.isnan(listProbs)
+    if np.any(nanmask):
+        print(f"CAREFUL !!!!! {np.sum(nanmask.astype(int))} NANs IN PROBA !!!")
+        listProbs[nanmask] = 0
     listWeights = np.append(listWeights, 1e-10)
     if label not in tabMetricsAll: tabMetricsAll[label]={}
     print(f"Scores {label}")
