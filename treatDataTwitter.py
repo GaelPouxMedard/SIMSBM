@@ -429,6 +429,7 @@ def treatForNMMSBM():
                                 passed=True
                         if passed:
                             o.write("\n")
+                    print(u, setU)
     print(list(sorted(list(nbOccTweet.values()), reverse=True)))
     print(list(sorted(list(nbOccRetweet.values()), reverse=True)))
 
