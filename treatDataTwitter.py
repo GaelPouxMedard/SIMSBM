@@ -410,7 +410,7 @@ def treatForNMMSBM():
                                 if fstPass:
                                     o.write(u + "\t")
                                     o.write(inf_i)
-                                    setU.add(u[1:])
+                                    setU.add(u)
                                 else:
                                     o.write(" " + inf_i)
                                 passed = True
