@@ -506,7 +506,9 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     else:
         tabMetricsAll[label][f"P@{k}"] = np.average(trueTopK, weights=listWeights, axis=0)[0]
 
-    print(listProbs)
+    print(listProbs[listProbs==np.nan])
+    print(np.isnan(listProbs))
+    print(np.max(listProbs))
     tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="micro", sample_weight=listWeights)
     tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="micro", sample_weight=listWeights)
     tabMetricsAll[label]["RankAvgPrec"] = metrics.label_ranking_average_precision_score(listTrue, listProbs, sample_weight=listWeights)
