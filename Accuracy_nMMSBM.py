@@ -578,7 +578,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
-            #do_TF = False
+            do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [20], False, 1))
             list_params.append(([0], [3], [2], [20], False, 1))
@@ -593,7 +593,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "imdb" in folder.lower():
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
-            #do_TF = False
+            do_TF = False
             list_params = []
             list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
             paramsDS.append(list_params)
@@ -613,7 +613,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
-            do_TF = True
+            do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [7], False, 0))
             list_params.append(([0], [3], [2], [7], False, 0))
@@ -633,7 +633,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
-            do_TF = True
+            do_TF = False
             list_params = []
             list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
             paramsDS.append(list_params)
