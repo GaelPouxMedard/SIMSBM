@@ -410,6 +410,7 @@ def treatForNMMSBM():
                                 if fstPass:
                                     f1.write(u[1:]+"\t")
                                     f1.write(inf_i)
+                                    fstPass = False
                                 else:
                                     f1.write(" "+inf_i)
                                 passed=True
@@ -423,6 +424,7 @@ def treatForNMMSBM():
                                 if fstPass:
                                     o.write(u+"\t")
                                     o.write(inf_i)
+                                    fstPass = False
                                 else:
                                     o.write(" "+inf_i)
                                 passed=True
