@@ -433,7 +433,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             try:
                 tempProbPF.append(pPF[tuple(karray[inds])])
             except Exception as e:
-                tempProbPF.append(np.zeros((nbOut)));print(e)
+                tempProbPF.append(np.zeros((nbOut))+1e-20);print(e)
 
             # [inds] important car réduit le DS au modèle considéré
             tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
@@ -442,7 +442,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
                 parr = WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF)
                 tempProbNMF.append(parr/sum(parr))
             except Exception as e:
-                tempProbNMF.append(np.zeros((nbOut)));print(e)
+                tempProbNMF.append(np.zeros((nbOut))+1e-20);print(e)
 
             tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
@@ -482,6 +482,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
 #// region Metrics
 
 def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
+    print(f"Scores {label}")
     listTrue = np.vstack((listTrue, np.ones((nbOut))))  # Pour eviter qu'une classe n'ait aucun ex negatif ; prendre la moyenne weighted si on utilise ca !
     listProbs = np.vstack((listProbs, np.ones((nbOut))))
     nanmask = np.isnan(listProbs)
@@ -490,7 +491,6 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
         listProbs[nanmask] = 0
     listWeights = np.append(listWeights, 1e-10)
     if label not in tabMetricsAll: tabMetricsAll[label]={}
-    print(f"Scores {label}")
 
     tabMetricsAll[label]["F1"], tabMetricsAll[label]["Acc"] = 0, 0
     for thres in np.linspace(0, 1, 101):
@@ -510,9 +510,6 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     else:
         tabMetricsAll[label][f"P@{k}"] = np.average(trueTopK, weights=listWeights, axis=0)[0]
 
-    print(listProbs[listProbs==np.nan])
-    print(np.isnan(listProbs))
-    print(np.max(listProbs))
     tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="micro", sample_weight=listWeights)
     tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="micro", sample_weight=listWeights)
     tabMetricsAll[label]["RankAvgPrec"] = metrics.label_ranking_average_precision_score(listTrue, listProbs, sample_weight=listWeights)
