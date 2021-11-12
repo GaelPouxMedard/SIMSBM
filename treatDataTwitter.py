@@ -394,6 +394,7 @@ def treatForNMMSBM():
                             nbOccRetweet[inf_i] += 1
                         o.write(u+"\t"+inf+"\n")
 
+    setU = set()
     with open("Data/Twitter/nounsPost.txt", "r", encoding="utf-8") as f_raw:
         with open("Data/Twitter/outcome.txt", "a", encoding="utf-8") as o:
             o.truncate(0)
@@ -408,13 +409,14 @@ def treatForNMMSBM():
                             if nbOccTweet[inf_i] > thresInput:
                                 if fstPass:
                                     f1.write(u[1:]+"\t")
+                                    setU.add(u[1:])
                                     f1.write(inf_i)
                                 else:
                                     f1.write(" "+inf_i)
                                 passed=True
                         if passed:
                             f1.write("\n")
-                    elif u[0] != "-":
+                    elif u[0] != "-" and u in setU:
                         fstPass = True
                         passed = False
                         for inf_i in inf.split(" "):
