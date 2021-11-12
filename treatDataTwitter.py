@@ -372,6 +372,10 @@ def retreat(folder):
 
 
 def treatForNMMSBM():
+    nbOccTweet = {}
+    nbOccRetweet = {}
+    thresInput = 50
+    thresOutput = 50
     with open("Data/Twitter/nounsPost.txt", "r", encoding="utf-8") as f_raw:
         with open("Data/Twitter/outcome.txt", "a", encoding="utf-8") as o:
             o.truncate(0)
@@ -380,8 +384,26 @@ def treatForNMMSBM():
                 for line in f_raw:
                     u, inf = line.replace("\n", "").split("\t")
                     if u[0] == "-":
+                        for inf_i in inf.split(" "):
+                            if inf_i not in nbOccTweet: nbOccTweet[inf_i] = 0
+                            nbOccTweet[inf_i] += 1
                         f1.write(u[1:]+"\t"+inf+"\n")
                     else:
+                        for inf_i in inf.split(" "):
+                            if inf_i not in nbOccRetweet: nbOccRetweet[inf_i] = 0
+                            nbOccTweet[inf_i] += 1
+                        o.write(u+"\t"+inf+"\n")
+
+    with open("Data/Twitter/nounsPost.txt", "r", encoding="utf-8") as f_raw:
+        with open("Data/Twitter/outcome.txt", "a", encoding="utf-8") as o:
+            o.truncate(0)
+            with open("Data/Twitter/feature_0.txt", "a", encoding="utf-8") as f1:
+                f1.truncate(0)
+                for line in f_raw:
+                    u, inf = line.replace("\n", "").split("\t")
+                    if u[0] == "-" and nbOccTweet[inf_i]>thresInput:
+                        f1.write(u[1:]+"\t"+inf+"\n")
+                    elif u[0] != "-" and nbOccRetweet[inf_i]>thresOutput:
                         o.write(u+"\t"+inf+"\n")
 
 treatForNMMSBM()
