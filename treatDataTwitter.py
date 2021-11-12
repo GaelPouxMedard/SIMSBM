@@ -402,34 +402,33 @@ def treatForNMMSBM():
                 f1.truncate(0)
                 for line in f_raw:
                     u, inf = line.replace("\n", "").split("\t")
-                    if u[0] == "-":
+                    if u[0] != "-":
+                        fstPass = True
+                        passed = False
+                        for inf_i in inf.split(" "):
+                            if nbOccRetweet[inf_i] > thresOutput:
+                                if fstPass:
+                                    o.write(u + "\t")
+                                    o.write(inf_i)
+                                    setU.add(u[1:])
+                                else:
+                                    o.write(" " + inf_i)
+                                passed = True
+                        if passed:
+                            o.write("\n")
+                    elif u[0] == "-" and u in setU:
                         fstPass = True
                         passed = False
                         for inf_i in inf.split(" "):
                             if nbOccTweet[inf_i] > thresInput:
                                 if fstPass:
                                     f1.write(u[1:]+"\t")
-                                    setU.add(u[1:])
                                     f1.write(inf_i)
                                 else:
                                     f1.write(" "+inf_i)
                                 passed=True
                         if passed:
                             f1.write("\n")
-                    elif u[0] != "-" and u in setU:
-                        fstPass = True
-                        passed = False
-                        for inf_i in inf.split(" "):
-                            if nbOccRetweet[inf_i]>thresOutput:
-                                if fstPass:
-                                    o.write(u+"\t")
-                                    o.write(inf_i)
-                                else:
-                                    o.write(" "+inf_i)
-                                passed=True
-                        if passed:
-                            o.write("\n")
-                    print(u, setU)
     print(list(sorted(list(nbOccTweet.values()), reverse=True)))
     print(list(sorted(list(nbOccRetweet.values()), reverse=True)))
 
