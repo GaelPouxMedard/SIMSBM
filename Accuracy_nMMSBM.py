@@ -653,9 +653,9 @@ else:  # Experimental evaluation
         if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
             list_params = []
-            list_params.append(([0], [3], [1], [10], False, 10))
-            list_params.append(([0], [3], [2], [10], False, 10))
-            list_params.append(([0], [3], [3], [10], False, 10))
+            list_params.append(([0], [3], [1], [10], False, 0))
+            list_params.append(([0], [3], [2], [10], False, 0))
+            list_params.append(([0], [3], [3], [10], False, 0))
             paramsDS.append(list_params)
 
 
