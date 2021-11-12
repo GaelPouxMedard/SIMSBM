@@ -391,7 +391,7 @@ def treatForNMMSBM():
                     else:
                         for inf_i in inf.split(" "):
                             if inf_i not in nbOccRetweet: nbOccRetweet[inf_i] = 0
-                            nbOccTweet[inf_i] += 1
+                            nbOccRetweet[inf_i] += 1
                         o.write(u+"\t"+inf+"\n")
 
     with open("Data/Twitter/nounsPost.txt", "r", encoding="utf-8") as f_raw:
