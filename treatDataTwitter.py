@@ -414,11 +414,11 @@ def treatForNMMSBM():
                                 passed=True
                         if passed:
                             f1.write("\n")
-                    elif u[0] != "-" and nbOccRetweet[inf_i]>thresOutput:
+                    elif u[0] != "-":
                         fstPass = True
                         passed = False
                         for inf_i in inf.split(" "):
-                            if nbOccTweet[inf_i] > thresInput:
+                            if nbOccRetweet[inf_i]>thresOutput:
                                 if fstPass:
                                     o.write(u+"\t")
                                     o.write(inf_i)
