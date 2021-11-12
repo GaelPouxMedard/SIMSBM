@@ -402,21 +402,7 @@ def treatForNMMSBM():
                 f1.truncate(0)
                 for line in f_raw:
                     u, inf = line.replace("\n", "").split("\t")
-                    if u[0] != "-":
-                        fstPass = True
-                        passed = False
-                        for inf_i in inf.split(" "):
-                            if nbOccRetweet[inf_i] > thresOutput:
-                                if fstPass:
-                                    o.write(u + "\t")
-                                    o.write(inf_i)
-                                    setU.add(u)
-                                else:
-                                    o.write(" " + inf_i)
-                                passed = True
-                        if passed:
-                            o.write("\n")
-                    elif u[0] == "-" and u in setU:
+                    if u[0] == "-":
                         fstPass = True
                         passed = False
                         for inf_i in inf.split(" "):
@@ -429,6 +415,19 @@ def treatForNMMSBM():
                                 passed=True
                         if passed:
                             f1.write("\n")
+                    elif u[0] != "-":
+                        fstPass = True
+                        passed = False
+                        for inf_i in inf.split(" "):
+                            if nbOccRetweet[inf_i]>thresOutput:
+                                if fstPass:
+                                    o.write(u+"\t")
+                                    o.write(inf_i)
+                                else:
+                                    o.write(" "+inf_i)
+                                passed=True
+                        if passed:
+                            o.write("\n")
     print(list(sorted(list(nbOccTweet.values()), reverse=True)))
     print(list(sorted(list(nbOccRetweet.values()), reverse=True)))
 
