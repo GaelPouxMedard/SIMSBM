@@ -23,7 +23,7 @@ def normalized(a, dicForm=False):
     for ind, c in enumerate(nnz):
         if ind%(lg//10)==0: print("Normalizing", ind*100./lg, "%")
 
-        if c not in dicMax: dicMax[c] = np.sum(a[c])
+        if c not in dicMax: dicMax[c] = np.sum(a[c])+1e-20
 
         if dicForm:
             dic[c]=a[c].todense()/dicMax[c]
@@ -433,16 +433,16 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             try:
                 tempProbPF.append(pPF[tuple(karray[inds])])
             except Exception as e:
-                tempProbPF.append(np.zeros((nbOut))+1e-20);print(e)
+                tempProbPF.append(np.zeros((nbOut)));print(e)
 
             # [inds] important car réduit le DS au modèle considéré
             tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
 
             try:
                 parr = WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF)
-                tempProbNMF.append(parr/sum(parr))
+                tempProbNMF.append(parr/(sum(parr)+1e-20))
             except Exception as e:
-                tempProbNMF.append(np.zeros((nbOut))+1e-20);print(e)
+                tempProbNMF.append(np.zeros((nbOut)));print(e)
 
             tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
