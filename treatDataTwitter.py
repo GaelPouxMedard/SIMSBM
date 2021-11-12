@@ -374,8 +374,8 @@ def retreat(folder):
 def treatForNMMSBM():
     nbOccTweet = {}
     nbOccRetweet = {}
-    thresInput = 50
-    thresOutput = 50
+    thresInput = 100
+    thresOutput = 100
     with open("Data/Twitter/nounsPost.txt", "r", encoding="utf-8") as f_raw:
         with open("Data/Twitter/outcome.txt", "a", encoding="utf-8") as o:
             o.truncate(0)
@@ -394,7 +394,6 @@ def treatForNMMSBM():
                             nbOccRetweet[inf_i] += 1
                         o.write(u+"\t"+inf+"\n")
 
-    setU = set()
     with open("Data/Twitter/nounsPost.txt", "r", encoding="utf-8") as f_raw:
         with open("Data/Twitter/outcome.txt", "a", encoding="utf-8") as o:
             o.truncate(0)
