@@ -502,7 +502,7 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
     if label not in tabMetricsAll: tabMetricsAll[label]={}
 
     tabMetricsAll[label]["F1"], tabMetricsAll[label]["Acc"] = 0, 0
-    for thres in np.linspace(0, 1, 101):
+    for thres in np.linspace(0, 1, 1001):
         F1 = metrics.f1_score(listTrue, (listProbs>thres).astype(int), average="weighted", sample_weight=listWeights)
         acc = metrics.accuracy_score(listTrue, (listProbs>thres).astype(int), sample_weight=listWeights)
         if F1 > tabMetricsAll[label]["F1"]:
