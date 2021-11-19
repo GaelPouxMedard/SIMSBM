@@ -410,6 +410,15 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
             break
 
+
+        if j>60000 and "PubMed" in folder:
+            print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
+            break
+
         if id not in outcome: continue
 
         toProd = []
