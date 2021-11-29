@@ -20,7 +20,7 @@ with open("tableResLatex.txt", "w+") as o:
                 if fstPass:
                     fstPass = False
                     for l in labels:
-                        o.write("|S[table-format=2.2]")
+                        o.write("|S[table-format=1.3]")
                     o.write("}\n")
 
                 o.write("\n\t\t\\cline{1-"+str(2+numLabels)+"}\n")
