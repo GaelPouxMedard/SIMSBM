@@ -426,7 +426,8 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             toProd.append(list(itertools.combinations(features[i][id], r=DS[i])))
         #toProd.append(list(itertools.combinations(outcome[id], r=1)))
         listKeys = list(itertools.product(*toProd))
-        if len(listKeys)==0 or len(listKeys)>500: continue
+        if len(listKeys)==0: continue
+        if len(listKeys)>500: listKeys=listKeys[:500]
 
         a = np.zeros((nbOut))
         for o in outcome[id]:
