@@ -74,10 +74,10 @@ with open("tableResLatex.txt", "w+") as o:
                         for res_i, r in enumerate(res):
                             o.write(f"& ")
                             if bestResDS[DS][res_i]==r:
-                                o.write("\\\maxf\{")
+                                o.write("\\\maxf{")
                             o.write(f"{r} ")
                             if bestResDS[DS][res_i]==r:
-                                o.write("\}")
+                                o.write("}")
                         o.write("\\\\ \n")
 
                     if i!=len(dicDS)-1:
