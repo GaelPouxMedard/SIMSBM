@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/Data" />
+      <excludeFolder url="file://$MODULE_DIR$/Output" />
       <excludeFolder url="file://$MODULE_DIR$/Output (old)" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6 (Codes)" jdkType="Python SDK" />

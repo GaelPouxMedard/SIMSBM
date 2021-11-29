@@ -578,8 +578,8 @@ if False:  # "UI"
 
 else:  # Experimental evaluation
     try:
-        folder=sys.argv[1]
-        #folder="Spotify";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
+        #folder=sys.argv[1]
+        folder="drugs";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
         # Features, DS, nbInterp, nbClus, buildData, seuil
         paramsDS = []
         if "pubmed" in folder.lower():
@@ -591,7 +591,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
-            do_TF = False
+            do_TF = True
             list_params = []
             list_params.append(([0], [3], [1], [20], False, 1))
             list_params.append(([0], [3], [2], [20], False, 1))
@@ -629,19 +629,19 @@ else:  # Experimental evaluation
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
             do_TF = False
             list_params = []
-            list_params.append(([0], [3], [1], [7], False, 0))
+            list_params.append(([0], [3], [1], [7], True, 0))
             list_params.append(([0], [3], [2], [7], False, 0))
             list_params.append(([0], [3], [3], [7], False, 0))
             paramsDS.append(list_params)
 
             list_params = []
-            list_params.append(([0, 3], [3, 1], [1, 1], [7, 5], False, 0))
+            list_params.append(([0, 3], [3, 1], [1, 1], [7, 5], True, 0))
             list_params.append(([0, 3], [3, 1], [2, 1], [7, 5], False, 0))
             list_params.append(([0, 3], [3, 1], [3, 1], [7, 5], False, 0))
             paramsDS.append(list_params)
 
             list_params = []
-            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [7, 3, 3, 5], False, 0))
+            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [7, 3, 3, 5], True, 0))
             list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [7, 3, 3, 5], False, 0))
             list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [7, 3, 3, 5], False, 0))
             paramsDS.append(list_params)

@@ -842,7 +842,7 @@ if False:  # If we want to specify precisely what to do ; UI
 
 else:  # EXPERIMENTAL SETUP
     try:
-        folder=sys.argv[1]
+        #folder=sys.argv[1]
         prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
         maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
         saveToFile = True
@@ -850,7 +850,7 @@ else:  # EXPERIMENTAL SETUP
         nbRuns = 1#00
         reductionK = False
         lim = -1
-        #folder = "Drugs"
+        folder = "Drugs"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
