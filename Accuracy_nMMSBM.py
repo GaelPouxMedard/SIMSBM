@@ -411,7 +411,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             break
 
 
-        if j>20000 and "PubMed" in folder:
+        if j>20000 and "PubMed" in folder and False:
             print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
             print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
             print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
@@ -585,9 +585,9 @@ else:  # Experimental evaluation
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
             list_params = []
-            list_params.append(([0], [3], [1], [20], False, 500))
-            list_params.append(([0], [3], [2], [20], False, 500))
-            list_params.append(([0], [3], [3], [20], False, 500))
+            list_params.append(([0], [3], [1], [20], False, 0))
+            list_params.append(([0], [3], [2], [20], False, 0))
+            list_params.append(([0], [3], [3], [20], False, 0))
             paramsDS.append(list_params)
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
