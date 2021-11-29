@@ -49,7 +49,6 @@ with open("tableResLatex.txt", "w+") as o:
                                 bestResDS[DS][i] = r
                             elif bestResDS[DS][i]>r:
                                 bestResDS[DS][i] = r
-                    print(bestResDS[DS])
                     dicDS[DS].append((model, res))
                     numRow += 1
 
@@ -74,7 +73,6 @@ with open("tableResLatex.txt", "w+") as o:
 
                         for res_i, r in enumerate(res):
                             o.write(f"& ")
-                            #print(bestResDS[DS][res_i], r)
                             if bestResDS[DS][res_i]==r:
                                 o.write(f"\\bfseries ")
                             o.write(f"{r} ")
