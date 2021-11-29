@@ -249,7 +249,7 @@ def concatenateDiseases(folder):
     return disease_df
 
 
-def treatHarvestedData(folder, thres=0, numPublis=1e20):
+def treatHarvestedData(folder, thresDis=0, numPublis=1e20, thresSympt=0):
 
     symptom_df = read_pmids_tsv("Data/" + folder + "/"+'Raw/symptom-pmids.tsv.gz', key='mesh_id')
     disease_df = read_pmids_tsv("Data/" + folder + "/"+'Raw/disease-pmids.tsv.gz', key='mesh_id')
@@ -263,7 +263,8 @@ def treatHarvestedData(folder, thres=0, numPublis=1e20):
     listDis=[]
     for (dis,idPudDis) in zip(disease_df["mesh_name"], disease_df["pubmed_ids"]):
         tabIDsDis = idPudDis.split("|")
-        if len(tabIDsDis)<thres: continue
+        #print(dis, "# publis:", len(tabIDsDis))
+        if len(tabIDsDis)<thresDis: continue
         dis=dis.split(", ")[0].replace(" ", "_")
         listDis.append(dis)
         for i, IDDis in enumerate(tabIDsDis):
@@ -278,7 +279,7 @@ def treatHarvestedData(folder, thres=0, numPublis=1e20):
     listSym=[]
     for (sym, idPudSym) in zip(symptom_df["mesh_name"], symptom_df["pubmed_ids"]):
         tabIDsSym = idPudSym.split("|")
-        if len(tabIDsSym)<thres: continue
+        if len(tabIDsSym)<thresSympt: continue
         sym=sym.split(", ")[0].replace(" ", "_")
         listSym.append(sym)
         for i, IDSym in enumerate(tabIDsSym):
@@ -321,7 +322,7 @@ def treatHarvestedData(folder, thres=0, numPublis=1e20):
 
 
 def retreat(folder, listFiles=None):
-    outcome, features = treatHarvestedData(folder)
+    outcome, features = treatHarvestedData(folder, thresDis=100000, numPublis=10000)
 
     folder = "Data/" + folder + "/"
     print("Saving data")
