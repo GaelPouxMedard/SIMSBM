@@ -41,12 +41,12 @@ with open("tableResLatex.txt", "w+") as o:
                         if labels[i] in metricsMax:
                             if bestResDS[DS][i] is None:
                                 bestResDS[DS][i] = r
-                            elif float(bestResDS[DS][i])<float(r):
+                            elif round(float(bestResDS[DS][i]), 3)<round(float(r), 3):
                                 bestResDS[DS][i] = r
                         elif labels[i] in metricsMin:
                             if bestResDS[DS][i] is None:
                                 bestResDS[DS][i] = r
-                            elif float(bestResDS[DS][i])>float(r):
+                            elif round(float(bestResDS[DS][i]), 3)>round(float(r), 3):
                                 bestResDS[DS][i] = r
                     dicDS[DS].append((model, res))
                     numRow += 1
