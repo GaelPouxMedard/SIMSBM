@@ -627,7 +627,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
-            do_TF = True
+            do_TF = False
             list_params = []
             list_params.append(([0], [3], [1], [7], False, 0))
             list_params.append(([0], [3], [2], [7], False, 0))
