@@ -36,18 +36,17 @@ with open("tableResLatex.txt", "w+") as o:
                         dicDS[DS] = []
                         bestResDS[DS] = [None]*(len(labels)-1)
                     res = res.split(", ")[:-1]
-
                     for i, r in enumerate(res):
                         if "PF" in model: continue
                         if labels[i] in metricsMax:
                             if bestResDS[DS][i] is None:
                                 bestResDS[DS][i] = r
-                            elif bestResDS[DS][i]<r:
+                            elif float(bestResDS[DS][i])<float(r):
                                 bestResDS[DS][i] = r
                         elif labels[i] in metricsMin:
                             if bestResDS[DS][i] is None:
                                 bestResDS[DS][i] = r
-                            elif bestResDS[DS][i]>r:
+                            elif float(bestResDS[DS][i])>float(r):
                                 bestResDS[DS][i] = r
                     dicDS[DS].append((model, res))
                     numRow += 1
