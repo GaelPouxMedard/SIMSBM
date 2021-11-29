@@ -322,7 +322,7 @@ def treatHarvestedData(folder, thresDis=0, numPublis=1e20, thresSympt=0):
 
 
 def retreat(folder, listFiles=None):
-    outcome, features = treatHarvestedData(folder, thresDis=100000, numPublis=10000)
+    outcome, features = treatHarvestedData(folder, thresDis=10000, numPublis=10000)
 
     folder = "Data/" + folder + "/"
     print("Saving data")
