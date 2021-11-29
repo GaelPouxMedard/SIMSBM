@@ -442,7 +442,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             try:
                 tempProbPF.append(pPF[tuple(karray[inds])])
             except Exception as e:
-                tempProbPF.append(np.zeros((nbOut)));print(e)
+                tempProbPF.append(np.zeros((nbOut)));print("PF failure", e)
 
             # [inds] important car réduit le DS au modèle considéré
             tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
@@ -451,7 +451,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
                 parr = WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF)
                 tempProbNMF.append(parr/(sum(parr)+1e-20))
             except Exception as e:
-                tempProbNMF.append(np.zeros((nbOut)));print(e)
+                tempProbNMF.append(np.zeros((nbOut)));print("NMF failure", e)
 
             tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 
@@ -578,8 +578,8 @@ if False:  # "UI"
 
 else:  # Experimental evaluation
     try:
-        #folder=sys.argv[1]
-        folder="Drugs";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
+        folder=sys.argv[1]
+        #folder="Drugs";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
         # Features, DS, nbInterp, nbClus, buildData, seuil
         paramsDS = []
         if "pubmed" in folder.lower():
@@ -627,7 +627,7 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
-            do_TF = False
+            do_TF = True
             list_params = []
             list_params.append(([0], [3], [1], [7], False, 0))
             list_params.append(([0], [3], [2], [7], False, 0))
