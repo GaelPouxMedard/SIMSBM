@@ -8,6 +8,7 @@ from copy import copy as copy
 import itertools
 from sklearn import metrics
 import pickle
+import random
 import sys
 import sktensor
 
@@ -427,7 +428,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
         #toProd.append(list(itertools.combinations(outcome[id], r=1)))
         listKeys = list(itertools.product(*toProd))
         if len(listKeys)==0: continue
-        if len(listKeys)>500: listKeys=listKeys[:500]
+        if len(listKeys)>100: listKeys=random.sample(listKeys, 100)
 
         a = np.zeros((nbOut))
         for o in outcome[id]:
