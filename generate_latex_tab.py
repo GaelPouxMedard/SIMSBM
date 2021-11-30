@@ -5,12 +5,11 @@ metricsMax = "F1 Acc P@1 P@2 P@3 P@5 P@10 AUCROC AUCPR RankAvgPrec"
 metricsMin = "CovErr CovErrNorm"
 
 with open("tableResLatex.txt", "w+") as o:
-    o.write("\\begin{document}\n\n")
     for folder in os.listdir(f"Results"):
         files = os.listdir(f"Results/{folder}")
 
         for file in files:
-            o.write("\\begin{table}\n\t\\centering\n")
+            o.write("\\begin{table*}\n\t\\centering\n")
             o.write("\t\\begin{tabular}{|l|l|l")
             fstPass = True
             with open(f"Results/{folder}/{file}", "r") as f:
@@ -86,5 +85,4 @@ with open("tableResLatex.txt", "w+") as o:
 
 
             o.write("\t\\end{tabular}")
-            o.write("\n\\end{table}\n\n\n\n")
-    o.write("\\end{document}\n\n")
+            o.write("\n\\end{table*}\n\n\n\n")
