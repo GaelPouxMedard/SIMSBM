@@ -748,6 +748,7 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
     print("Alpha:", len(alpha_Tr.data), alpha_Tr)
     print("Number triplets training:", alpha_Tr.sum())
     print("Number triplets test:", alpha_Te.sum())
+    print(np.sum(alpha_Tr), np.sum(alpha_Tr.data))
     print()
     return -1
     if not sparseMatrices:
