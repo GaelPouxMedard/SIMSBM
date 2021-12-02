@@ -16,9 +16,9 @@ with open("tableResLatex.txt", "w+") as o:
         if isin: continue
 
         files = os.listdir(f"Results/{folder}")
-        bestResDS = {}
 
         for file in files:
+            bestResDS = {}
             o.write("\\begin{table*}\n\t\\centering\n")
             o.write("\t\\begin{tabular}{|l|l|l")
             fstPass = True
