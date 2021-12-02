@@ -411,15 +411,6 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
             break
 
-
-        if j>20000 and "PubMed" in folder and False:
-            print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES (PUBMED) ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
-            print("ATTENTION CA S'EST ARRETE EXPRES ==============================================")
-            break
-
         if id not in outcome: continue
 
         toProd = []
@@ -444,7 +435,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
             try:
                 tempProbPF.append(pPF[tuple(karray[inds])])
             except Exception as e:
-                tempProbPF.append(np.zeros((nbOut)));print("PF failure", e)
+                tempProbPF.append(np.zeros((nbOut)))#;print("PF failure", e)
 
             # [inds] important car réduit le DS au modèle considéré
             tempProbMod.append(getElemProb(karray[inds], thetasMod, pMod, featToClus))
@@ -453,7 +444,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
                 parr = WNMF[coordToInt[str(tuple(karray[inds]))]].dot(HNMF)
                 tempProbNMF.append(parr/(sum(parr)+1e-20))
             except Exception as e:
-                tempProbNMF.append(np.zeros((nbOut)));print("NMF failure", e)
+                tempProbNMF.append(np.zeros((nbOut)))#;print("NMF failure", e)
 
             tempProbTF.append(getProbTF(karray[inds], modU, modCore))
 

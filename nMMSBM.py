@@ -880,13 +880,13 @@ else:  # EXPERIMENTAL SETUP
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
             nbRuns = 10
             list_params = []
-            list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], True, 0))  # Antonia
+            list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
 
             #  Attention, le nombre de clusters pour 2 modèles avec le même nombre de permutations doit être différent sinon l'un écrase l'autre (voir codeT pour les sauvegardes)
-            list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], False, 0))
+            list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], True, 0))
             list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
 
-            list_params.append(([1, 3], [1, 2], [1, 1], [10, 8], False, 0))  # Maybe too large
+            list_params.append(([1, 3], [1, 2], [1, 1], [10, 8], True, 0))  # Maybe too large
             list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
 
             list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
