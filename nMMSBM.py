@@ -745,6 +745,7 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
         alpha_Tr = alpha_Tr.sum(toRem)
         alpha_Te = alpha_Te.sum(toRem)
 
+    print(alpha_Tr.data)
     print("Alpha:", len(alpha_Tr.data), alpha_Tr)
     print("Number triplets training:", alpha_Tr.sum())
     print("Number triplets test:", alpha_Te.sum())
