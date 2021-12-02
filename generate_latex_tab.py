@@ -8,6 +8,13 @@ modelExcl = ["Drugs", "Twitter", "Dota"]
 
 with open("tableResLatex.txt", "w+") as o:
     for folder in os.listdir(f"Results"):
+
+        isin = False
+        for mod in modelExcl:
+            if mod.lower() in folder.lower():
+                isin = True
+        if isin: continue
+
         files = os.listdir(f"Results/{folder}")
 
         for file in files:
@@ -15,12 +22,6 @@ with open("tableResLatex.txt", "w+") as o:
             o.write("\t\\begin{tabular}{|l|l|l")
             fstPass = True
             with open(f"Results/{folder}/{file}", "r") as f:
-                isin=False
-                for mod in modelExcl:
-                    if mod.lower() in folder.lower():
-                        isin=True
-                if isin: continue
-
                 firstline = f.readline()
                 labels = firstline.split("\t")[1:]
                 labelsReduced = labels + []
