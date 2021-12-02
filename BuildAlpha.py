@@ -140,6 +140,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
         alphaTr = alphaTr2 / len(permuts)  # somme permutations = 1 obs
         prev += i
 
+    print(list(alphaTr.data))
 
     # ================================ ALPHA TEST
     dicAlpha = {}
