@@ -16,6 +16,7 @@ with open("tableResLatex.txt", "w+") as o:
         if isin: continue
 
         files = os.listdir(f"Results/{folder}")
+        bestResDS = {}
 
         for file in files:
             o.write("\\begin{table*}\n\t\\centering\n")
@@ -39,7 +40,6 @@ with open("tableResLatex.txt", "w+") as o:
                 numRow = 0
                 dicDS = {}
                 tabRes = None
-                bestResDS = {}
                 for line in f:
                     model, res = line.split("\t")
                     DS = model[model.rfind("_")+1:]
