@@ -15,6 +15,12 @@ with open("tableResLatex.txt", "w+") as o:
             o.write("\t\\begin{tabular}{|l|l|l")
             fstPass = True
             with open(f"Results/{folder}/{file}", "r") as f:
+                isin=False
+                for mod in modelExcl:
+                    if mod.lower() in folder.lower():
+                        isin=True
+                if isin: continue
+
                 firstline = f.readline()
                 labels = firstline.split("\t")[1:]
                 labelsReduced = labels + []
@@ -66,11 +72,6 @@ with open("tableResLatex.txt", "w+") as o:
                 o.write("\n\t\t\\cline{2-"+str(2+numLabels)+"}\n")
                 o.write("\t\t\\multirow{"+str(numRow)+"}{*}{\\rotatebox[origin=c]{90}{\\footnotesize \\text{\\textbf{"+folder.replace("_", "-").replace("[", "(").replace("]", ")")+"}}}}\n")
                 for i, DS in enumerate(dicDS):
-                    isin=False
-                    for mod in modelExcl:
-                        if mod.lower() in DS.lower():
-                            isin=True
-                    if isin: continue
                     o.write("\n\t\t& \\multirow{"+str(len(dicDS[DS]))+"}{*}{\\rotatebox[origin=c]{90}{\\footnotesize \\text{\\textbf{"+DS.replace("_", "-").replace("[", "(").replace("]", ")")+"}}}}\n")
 
                     tabRes = dicDS[DS]
