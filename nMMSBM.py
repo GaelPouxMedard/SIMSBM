@@ -733,6 +733,9 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
     if onlyBuildDS:
         return 0
     print("Alpha:", len(alpha_Tr.data), alpha_Tr)
+    print("Number triplets training:", alpha_Tr.sum())
+    print("Number triplets test:", alpha_Te.sum())
+    pause()
 
 
 
