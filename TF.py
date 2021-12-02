@@ -6,6 +6,8 @@ import numpy as np
 from functools import reduce
 from utils import *
 
+# Karatzoglou, Alexandros, et al. Multiverse recommendation: n-dimensional tensor factorization for context-aware collaborative filtering. Proceedings of the fourth ACM conference on Recommender systems. ACM, 2010.
+
 def parse_args():
 	parser = argparse.ArgumentParser(description = 'Tensor Factorization')
 	parser.add_argument('--train' , type = str, default = '', help = 'Training file')

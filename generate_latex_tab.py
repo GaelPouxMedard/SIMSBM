@@ -15,6 +15,7 @@ with open("tableResLatex.txt", "w+") as o:
             with open(f"Results/{folder}/{file}", "r") as f:
                 firstline = f.readline()
                 labels = firstline.split("\t")[1:]
+                labels.remove("Acc").remove("CovErr")
                 numLabels = len(labels)
                 if fstPass:
                     fstPass = False
