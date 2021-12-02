@@ -3,6 +3,7 @@ import re
 
 metricsMax = "F1 Acc P@1 P@2 P@3 P@5 P@10 AUCROC AUCPR RankAvgPrec"
 metricsMin = "CovErr CovErrNorm"
+toRem = ["Acc", "CovErr"]
 
 with open("tableResLatex.txt", "w+") as o:
     for folder in os.listdir(f"Results"):
@@ -15,11 +16,13 @@ with open("tableResLatex.txt", "w+") as o:
             with open(f"Results/{folder}/{file}", "r") as f:
                 firstline = f.readline()
                 labels = firstline.split("\t")[1:]
-                labels = labels.remove("Acc").remove("CovErr")
-                numLabels = len(labels)
+                labelsReduced = labels + []
+                for l in toRem:
+                    labelsReduced.remove(l)
+                numLabels = len(labelsReduced)
                 if fstPass:
                     fstPass = False
-                    for l in labels:
+                    for l in labelsReduced:
                         o.write("|S") #[table-format=1.3]
                     o.write("}\n")
 
@@ -37,6 +40,8 @@ with open("tableResLatex.txt", "w+") as o:
                         bestResDS[DS] = [None]*(len(labels)-1)
                     res = res.split(", ")[:-1]
                     for i, r in enumerate(res):
+                        if labels[i] in toRem:
+                            continue
                         if "PF" in model: continue
                         if labels[i] in metricsMax:
                             if bestResDS[DS][i] is None:
@@ -53,6 +58,8 @@ with open("tableResLatex.txt", "w+") as o:
 
                 o.write("\t\t& & ")
                 for l in labels[:-1]:
+                    if l in toRem:
+                        continue
                     o.write("& \\text{" + l + "} ")
                 o.write("\\\\ \n")
                 o.write("\n\t\t\\cline{2-"+str(2+numLabels)+"}\n")
@@ -71,6 +78,8 @@ with open("tableResLatex.txt", "w+") as o:
                             o.write(f"\t\t& {model.replace('_', '-').replace('[', '(').replace(']', ')')} ")
 
                         for res_i, r in enumerate(res):
+                            if labels[res_i] in toRem:
+                                continue
                             o.write(f"& ")
                             if bestResDS[DS][res_i]==r:
                                 o.write("\\maxf{")
