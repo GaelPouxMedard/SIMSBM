@@ -85,8 +85,6 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
     lgIDs = len(IDsTraining)
     for iter, num in enumerate(IDsTraining):
-        if iter%(lgIDs//10)==0:
-            print("Alpha training :", iter*100./lgIDs, "%", sum(dicAlpha.values()), toProd)
 
         """
         toProd = []
@@ -110,6 +108,8 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
             keysSeen.add(k)
             dicAlpha[k] += 1
 
+    if iter%(lgIDs//10)==0:
+        print("Alpha training :", iter*100./lgIDs, "%", sum(dicAlpha.values()), toProd)
     nnz = np.array(list(dicAlpha.keys()))
     shape= []
     prev = 0
