@@ -167,8 +167,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
         for ktup in listKeys:
             k = sum(ktup, ())
-            print(k, keysSeen)
-            if k in keysSeen:
+            if k in keysSeen or True:
                 if k not in dicAlpha: dicAlpha[k] = 0
                 dicAlpha[k] += 1
 
