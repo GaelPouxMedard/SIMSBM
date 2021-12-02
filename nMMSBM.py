@@ -858,7 +858,7 @@ else:  # EXPERIMENTAL SETUP
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
             list_params = []
-            list_params.append(([0], [3], [1], [20], True, 0))
+            list_params.append(([0], [3], [1], [20], False, 0))
             list_params.append(([0], [3], [2], [20], False, 0))
             list_params.append(([0], [3], [3], [20], False, 0))
         if "spotify" in folder.lower():
