@@ -18,36 +18,6 @@ with open("tableResLatex.txt", "w+") as o:
         files = os.listdir(f"Results/{folder}")
 
         for file in files:
-            bestResDS = {}
-            fstPass = True
-            # Computes best res
-            with open(f"Results/{folder}/{file}", "r") as f:
-                firstline = f.readline()
-                labels = firstline.split("\t")[1:]
-                dicDS = {}
-                tabRes = None
-                for line in f:
-                    model, res = line.split("\t")
-                    DS = model[model.rfind("_")+1:]
-                    if DS not in dicDS:
-                        dicDS[DS] = []
-                        bestResDS[DS] = [None]*(len(labels)-1)
-                    res = res.split(", ")[:-1]
-                    for i, r in enumerate(res):
-                        if labels[i] in toRem:
-                            continue
-                        if "PF" in model: continue
-                        if labels[i] in metricsMax:
-                            if bestResDS[DS][i] is None:
-                                bestResDS[DS][i] = r
-                            elif round(float(bestResDS[DS][i]), 3)<round(float(r), 3):
-                                bestResDS[DS][i] = r
-                        elif labels[i] in metricsMin:
-                            if bestResDS[DS][i] is None:
-                                bestResDS[DS][i] = r
-                            elif round(float(bestResDS[DS][i]), 3)>round(float(r), 3):
-                                bestResDS[DS][i] = r
-
 
             o.write("\\begin{table*}\n\t\\centering\n")
             o.write("\t\\begin{tabular}{|l|l|l")
@@ -69,6 +39,7 @@ with open("tableResLatex.txt", "w+") as o:
 
                 numRow = 0
                 dicDS = {}
+                bestResDS = [None]*(len(labels)-1)
                 tabRes = None
                 for line in f:
                     model, res = line.split("\t")
@@ -79,6 +50,17 @@ with open("tableResLatex.txt", "w+") as o:
                     for i, r in enumerate(res):
                         if labels[i] in toRem:
                             continue
+                        if "PF" in model: continue
+                        if labels[i] in metricsMax:
+                            if bestResDS[i] is None:
+                                bestResDS[i] = r
+                            elif round(float(bestResDS[i]), 3)<round(float(r), 3):
+                                bestResDS[i] = r
+                        elif labels[i] in metricsMin:
+                            if bestResDS[i] is None:
+                                bestResDS[i] = r
+                            elif round(float(bestResDS[i]), 3)>round(float(r), 3):
+                                bestResDS[i] = r
                     dicDS[DS].append((model, res))
                     numRow += 1
 
@@ -107,10 +89,10 @@ with open("tableResLatex.txt", "w+") as o:
                             if labels[res_i] in toRem:
                                 continue
                             o.write(f"& ")
-                            if bestResDS[DS][res_i]==r:
+                            if bestResDS[res_i]==r:
                                 o.write("\\maxf{")
                             o.write(f" {r} ")
-                            if bestResDS[DS][res_i]==r:
+                            if bestResDS[res_i]==r:
                                 o.write("} ")
                         o.write("\\\\ \n")
 
