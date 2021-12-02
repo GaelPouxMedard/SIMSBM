@@ -164,6 +164,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
             toProd.append(list(itertools.combinations(features[i][num], r=nbInterp[i])))
         toProd.append(list(itertools.combinations(outcome[num], r=1)))
         listKeys = list(itertools.product(*toProd))
+        print(toProd, listKeys)
 
         for ktup in listKeys:
             k = sum(ktup, ())
