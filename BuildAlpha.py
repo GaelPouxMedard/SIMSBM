@@ -122,8 +122,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
     print("Build Alpha_Tr")
     alphaTr = sparse.COO(list(zip(*dicAlpha.keys())), list(dicAlpha.values()), shape=shape)
-    print(list(alphaTr.data))
-    print(alphaTr)
+    print(alphaTr, "# triples:", alphaTr.sum())
     del dicAlpha
 
     '''
@@ -186,6 +185,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
     print("Build Alpha_Te")
     alphaTe = sparse.COO(list(zip(*dicAlpha.keys())), list(dicAlpha.values()), shape=shape)
+    print(alphaTe, "# triples:", alphaTe.sum())
 
     '''
     # Symmetry alphaTe
