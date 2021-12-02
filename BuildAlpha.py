@@ -122,7 +122,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
 
     print("Build Alpha_Tr")
     alphaTr = sparse.COO(list(zip(*dicAlpha.keys())), list(dicAlpha.values()), shape=shape)
-    print(list(dicAlpha.values()))
+    print(list(alphaTr.data))
     print(alphaTr)
     del dicAlpha
 
