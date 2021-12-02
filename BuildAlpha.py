@@ -86,7 +86,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
     lgIDs = len(IDsTraining)
     for iter, num in enumerate(IDsTraining):
         if iter%(lgIDs//10)==0:
-            print("Alpha training :", iter*100./lgIDs, "%")
+            print("Alpha training :", iter*100./lgIDs, "%", sum(dicAlpha.values()))
 
         """
         toProd = []
