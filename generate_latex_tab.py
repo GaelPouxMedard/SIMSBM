@@ -4,7 +4,7 @@ import re
 metricsMax = "F1 Acc P@1 P@2 P@3 P@5 P@10 AUCROC AUCPR RankAvgPrec"
 metricsMin = "CovErr CovErrNorm"
 toRem = ["Acc", "CovErr"]
-modelExcl = ["Drugs", "Twitter"]
+modelExcl = ["Drugs", "Twitter", "Dota"]
 
 with open("tableResLatex.txt", "w+") as o:
     for folder in os.listdir(f"Results"):
@@ -68,7 +68,7 @@ with open("tableResLatex.txt", "w+") as o:
                 for i, DS in enumerate(dicDS):
                     isin=False
                     for mod in modelExcl:
-                        if mod in DS:
+                        if mod.lower() in DS.lower():
                             isin=True
                     if isin: continue
                     o.write("\n\t\t& \\multirow{"+str(len(dicDS[DS]))+"}{*}{\\rotatebox[origin=c]{90}{\\footnotesize \\text{\\textbf{"+DS.replace("_", "-").replace("[", "(").replace("]", ")")+"}}}}\n")
