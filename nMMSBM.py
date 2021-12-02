@@ -732,10 +732,6 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
 
     if onlyBuildDS:
         return 0
-    print("Alpha:", len(alpha_Tr.data), alpha_Tr)
-    print("Number triplets training:", alpha_Tr.sum())
-    print("Number triplets test:", alpha_Te.sum())
-    return -1
 
 
 
@@ -749,6 +745,11 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
         alpha_Tr = alpha_Tr.sum(toRem)
         alpha_Te = alpha_Te.sum(toRem)
 
+    print("Alpha:", len(alpha_Tr.data), alpha_Tr)
+    print("Number triplets training:", alpha_Tr.sum())
+    print("Number triplets test:", alpha_Te.sum())
+    print()
+    return -1
     if not sparseMatrices:
         try:
             alpha_Tr=alpha_Tr.todense()
