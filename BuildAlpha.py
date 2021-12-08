@@ -125,8 +125,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
     print(alphaTr, "# triples:", alphaTr.sum())
     del dicAlpha
 
-    '''
-    # Symmetry alphaTr
+    # Symmetry alphaTr (only useful for comparing models with different number of interactions, can be removed otherwise)
     prev = 0
     print("Enforcing symmetry", nbInterp)
     for num, i in enumerate(nbInterp):
@@ -139,7 +138,6 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
             alphaTr2 = alphaTr2 + alphaTr.transpose(arrTot)
         alphaTr = alphaTr2 / len(permuts)  # somme permutations = 1 obs
         prev += i
-    '''
 
     # ================================ ALPHA TEST
     dicAlpha = {}
@@ -187,8 +185,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
     alphaTe = sparse.COO(list(zip(*dicAlpha.keys())), list(dicAlpha.values()), shape=shape)
     print(alphaTe, "# triples:", alphaTe.sum())
 
-    '''
-    # Symmetry alphaTe
+    # Symmetry alphaTe  (only useful for comparing models with different number of interactions, can be removed otherwise)
     print("Enforcing symmetry")
     prev = 0
     for num, i in enumerate(nbInterp):
@@ -201,7 +198,6 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
             alphaTe2 += alphaTe.transpose(arrTot)
         alphaTe = alphaTe2 / len(permuts)
         prev += i
-    '''
 
 
     return alphaTr, alphaTe, IDsTraining, IDsTest
