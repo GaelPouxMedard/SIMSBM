@@ -11,6 +11,7 @@ from scipy.special import binom
 import time
 import itertools
 import sys
+from itertools import product
 
 '''
 import pprofile
@@ -305,10 +306,10 @@ def likelihood_old(thetas, p, alpha, featToClus):
 
     return L
 
-def likelihood(alpha, divrm):
-    return np.sum(alpha*np.log(divrm+1e-20))
+def likelihood(alpha, Pfo):
+    return np.sum(alpha*np.log(Pfo+1e-20))
 
-def getDivrm(alpha, thetas, p, featToClus):
+def getPfo(alpha, thetas, p, featToClus):
     nbFeat = len(featToClus)
 
     coords = alpha.nonzero()
@@ -324,12 +325,12 @@ def getDivrm(alpha, thetas, p, featToClus):
         vals.append(v)
     p = np.moveaxis(p, 0, -1)
 
-    divrm = sparse.COO(coords, np.array(vals), shape=alpha.shape)
+    Pfo = sparse.COO(coords, np.array(vals), shape=alpha.shape)
 
     if not sparseMatrices:
-        divrm=divrm.todense()
+        Pfo=Pfo.todense()
 
-    return divrm
+    return Pfo
 
 # Recursive function to build the dict whose keys are nonzero values of observations
 def buildDicCoords(f, dic):
@@ -341,7 +342,7 @@ def buildDicCoords(f, dic):
 
     return dic
 
-#Recursive function to build the denominator of omega (see main paper)
+#Recursive function to build P_{f,o} (the denominator of omega, see main paper)
 def getAllProbs(dic, vals, prob, thetas, featToClus, feat, nbFeat):
     if feat == nbFeat:
         for k in dic:
@@ -361,70 +362,64 @@ def prod(a):
     return x
 
 # EM steps for p
-def maximization_p(alpha, featToClus, popFeat, nbClus, theta, pPrev, divrm):
+def maximization_p(alpha, featToClus, popFeat, nbClus, theta, pPrev, Pfo):
     nbFeat = len(featToClus)
 
-    if sparseMatrices:
+    terme1 = alpha / (Pfo + 1e-20)  # features, o
+    for t in range(nbFeat):
+        sizeAfterOperation = prod(terme1.shape)*theta[featToClus[nbFeat - t - 1]].shape[1]*8/terme1.shape[-2]
+        if sizeAfterOperation < 2e9:  # As soon as we can use non-sparse we do it (2Gb)
+            #print("P dense")
+            tet = theta[featToClus[nbFeat - t - 1]].T  # K F1
+            terme1 = np.dot(tet, terme1)
+        else:
+            #print("P sparse")
+            tet = sparse.COO(theta[featToClus[nbFeat - t - 1]].T)  # K F1
+            terme1 = sparse.COO(np.dot(tet, terme1))
 
-        terme1 = alpha / (divrm + 1e-20)  # f1 f2 g r
-        for t in range(nbFeat):
-            sizeAfterOperation = prod(terme1.shape)*theta[featToClus[nbFeat - t - 1]].shape[1]*8/terme1.shape[-2]
-            #print(terme1.shape, sizeAfterOperation < 2e9)
-            if sizeAfterOperation < 2e9:  # As soon as we can use non-sparse we do it (1Gb)
-                #print("P dense")
-                tet = theta[featToClus[nbFeat - t - 1]].T  # K f1
-                terme1 = np.dot(tet, terme1)
-            else:
-                #print("P sparse")
-                tet = sparse.COO(theta[featToClus[nbFeat - t - 1]].T)  # K f1
-                terme1 = sparse.COO(np.dot(tet, terme1))
+    # print(terme1.shape)  # clusters, o
+    if prod(terme1.shape)*8 < 2e9 and type(terme1) is not type(np.array([])):
+        terme1 = terme1.todense()
 
+    grandDiv = np.sum(pPrev*terme1, -1)
+    grandDiv = np.expand_dims(grandDiv, -1)
+    p = pPrev*terme1 / (grandDiv+1e-20)  # pPrev appears in omega
 
-        # print(terme1.shape)  # K1 K2 L r
-        if prod(terme1.shape)*8 < 2e9 and type(terme1) is not type(np.array([])):
-            terme1 = terme1.todense()
+    '''  Explicit computation for 2 layers with 2 interactions each
+    omegatop = np.moveaxis(pPrev, -1, 0)
+    print(omegatop.shape)
+    omegatop = omegatop[:, :, :, :, :, None]*theta[0].T[None, :, None, None, None, :]
+    print(omegatop.shape)
+    omegatop = omegatop[:, :, :, :, :, :, None]*theta[0].T[None, None, :, None, None, None, :]
+    print(omegatop.shape)
+    omegatop = omegatop[:, :, :, :, :, :, :, None]*theta[1].T[None, None, None, :, None, None, None, :]
+    print(omegatop.shape)
+    omegatop = omegatop[:, :, :, :, :, :, :, :, None]*theta[1].T[None, None, None, None, :, None, None, None, :]
+    print(omegatop.shape)
+    omegatop = np.moveaxis(omegatop, 0, -1)
+    print(omegatop.shape)
 
-        grandDiv = np.sum(pPrev*terme1, -1)
-        grandDiv = np.expand_dims(grandDiv, -1)
-        p = pPrev*terme1 / (grandDiv+1e-20)
+    omega = omegatop/omegatop.sum(axis=(0, 1, 2, 3))[None, None, None, None, :, :, :, :, :]
+    p2 = omega[:, :, :, :, :, :, :, :, :]*alpha[None, None, None, None, :, :, :, :, :]
+    p2 = p2.sum(axis=(4, 5, 6, 7))
+    p2 = p2/p2.sum(axis=-1)[:, :, :, :, None]
 
-    else:
-        divrm = pPrev
-        for i in range(nbFeat):
-            divrm = theta[featToClus[nbFeat - i - 1]].dot(divrm)
-
-        terme1 = alpha / (divrm+1e-20)  # f1 f2 g r
-        for t in range(nbFeat):
-            terme1 = theta[featToClus[nbFeat - t - 1]].T.dot(terme1)
-
-        #print(terme1.shape)  # K1 K2 L r
-
-        grandDiv = np.sum(terme1, axis=-1)
-        grandDiv = np.expand_dims(grandDiv, -1)
-        p = terme1/grandDiv
+    '''
 
     return p
 
 # EM steps for theta
-def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, coeffBin, divrm):
+def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, coeffBin, Pfo):
     nbFeat = len(featToClus)
-    nbLayers = len(nbClus)
+    nbNatures = len(nbClus)
 
-    if sparseMatrices:
-        terme1 = alpha / (divrm + 1e-20)  # f1 f2 g r
-
-    else:
-        divrm = p
-        for i in range(nbFeat):
-            divrm = thetaPrev[featToClus[nbFeat - i - 1]].dot(divrm)
-
-        terme1 = alpha / (divrm + 1e-20)  # f1 f2 g r
+    terme1 = alpha / (Pfo + 1e-20)  # f1 f2 g r
 
     thetas = copy(thetaPrev)
     for i in range(len(thetas)):
         thetas[i]*=0
 
-    for i in range(nbLayers):
+    for i in range(nbNatures):
         arrFeat = []
         for feat in range(len(featToClus)):
             if i==featToClus[feat]: arrFeat.append(feat)
@@ -456,43 +451,80 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
 
         prob = sparse.moveaxis(prob2, -1, -2)
 
-        ''' # Old/Understandable way
-        # === 2 ===
-        prob = np.moveaxis(p, arrFeat, range(len(arrFeat)))
-        for t in range(nbFeat):
-            if nbFeat - t - 1 not in arrFeat:
-                prob = thetaPrev[featToClus[nbFeat - t - 1]].dot(prob)
-
-        prob = np.moveaxis(prob, -1, -1-len(arrFeat))  # g r K1 K2
-
-        for feat2 in range(len(arrFeat)):  # f2 g r K1
-            if feat2!=0:
-                #probOld = thetaPrev[i].dot(np.moveaxis(prob, -len(arrFeat)+feat2, -2))
-                sizeAfterOperation = prod(prob.shape)*thetaPrev[i].shape[0]*8/prob.shape[-len(arrFeat)+feat2]
-                #print(prob.shape, sizeAfterOperation < 2e9)
-                if sizeAfterOperation < 2e9:
-                    prob = np.tensordot(thetaPrev[i], np.moveaxis(prob, -len(arrFeat)+feat2, 0), axes=1)
-                else:
-                    if sizeAfterOperation < 2e9:
-                        prob = thetaPrev[i].dot(np.moveaxis(prob, -len(arrFeat) + feat2, -2))
-                    else:
-                        prob = sparse.tensordot(thetaPrev[i], sparse.moveaxis(sparse.COO(prob), -len(arrFeat) + feat2, 0), axes=1)
-
-
-
-        print(prob2.shape, prob.shape)
-        d = prob2 - prob
-        print(f"============== {i} ====================", np.max(d), d[d>1e-5])
-        '''
-
         b = sparse.moveaxis(terme1*coeffBin[i], arrFeat, range(len(arrFeat)))  # f1 f2 g r
 
         temp = sparse.tensordot(b, prob, axes=b.ndim - 1)  # f1 K1
 
-        thetas[i] += temp*len(arrFeat)  # En fait si on le fait n fois pour n interactions on aura tjrs le meme resultat
+        thetas[i] += temp*len(arrFeat)  # Repeat len(arrFeat) times, once for each feature of the same nature
 
         thetas[i] /= phim[i][:, None]+1e-20
         thetas[i] *= thetaPrev[i]
+
+
+
+
+
+
+    if True:
+
+        nbFeatNat = 3  # Nombre interactions
+        nbClusNat = len(thetas[0][-1])  # Nombre clusters
+        nbFeat = len(thetas[0])
+
+        nnz = alpha.nonzero()
+        d = alpha.data
+        Cm = np.zeros((len(thetas[0])))
+        for i, l in enumerate(list(zip(*nnz[:-1]))):
+            for m in set(l):
+                Cm[m] += l.count(m)*d[i]
+        print(Cm)
+
+
+        omegatop = np.moveaxis(p, -1, 0)
+        omegatop = omegatop[:, :, :, :, None]*thetas[0].T[None, :, None, None, :]
+        omegatop = omegatop[:, :, :, :, :, None]*thetas[0].T[None, None, :, None, None, :]
+        omegatop = omegatop[:, :, :, :, :, :, None]*thetas[0].T[None, None, None, :, None, None, :]
+        omega = omegatop/omegatop.sum(axis=(1, 2, 3))[:, None, None, None, :, :, :]
+        omega = np.moveaxis(omega, 0, -1)
+
+        theta2 = omega[:, :, :, :, :, :, :]*alpha[None, None, None, :, :, :, :]
+        theta2 = theta2.sum(axis=(3, 4, 6))
+
+        theta2 = theta2.sum(axis=(1, 2))
+        theta2 = theta2.T
+        theta2 = theta2/Cm[:, None]
+
+        thetas[0] = theta2
+
+        theta3 = np.zeros(thetas[0].shape)
+        Cm = np.zeros((thetas[0].shape[0]))
+        dataa = alpha.data
+        for ia, indAlpha in enumerate(list(zip(*alpha.nonzero()))[:10]):
+            indAlpha = tuple(indAlpha)
+            for m in range(len(Cm)):
+                if m not in indAlpha[:-1]: continue
+                Cm[m] += 3*dataa[ia]
+
+                for n in range(len(thetas[0][-1])):
+
+                    for indOmega in zip(*omega[:, :, :, indAlpha[0], indAlpha[1], indAlpha[2], indAlpha[3]].nonzero()):
+                        if n not in indOmega: continue
+                        indOmega = tuple(indOmega)
+                        cn = indOmega.count(n)
+
+                        tupInd = (indOmega[0], indOmega[1], indOmega[2], indAlpha[0], indAlpha[1], indAlpha[2], indAlpha[3])
+
+                        theta3[m, n] += omega[tupInd]*cn*dataa[ia]
+
+        theta3 = theta3/Cm[:, None]
+        print(Cm)
+
+        #print(np.sum(theta2, axis=1))
+        print(np.sum(theta3, axis=1))
+
+        #print(np.max(np.abs(thetas[0]-theta2)))
+
+    sys.exit()
 
     return thetas
 
@@ -500,17 +532,17 @@ def maximization_Theta(alpha, featToClus, popFeat, nbClus, thetaPrev, p, phim, c
 def distClus(K1, K2):
     return np.sum(abs(K1-K2))/np.sum(K1+K2)
 
-def BIC(thetas, p, alpha, featToClus, divrm):
+def BIC(thetas, p, alpha, featToClus, Pfo):
     k = np.prod(p.shape)
     for i in range(len(thetas)):
         k += np.prod(thetas[i].shape)
     n = np.sum(alpha)
     #L = likelihood(thetas, p, alpha, featToClus)
-    L = likelihood(alpha, divrm)
+    L = likelihood(alpha, Pfo)
 
     return k * np.log(n) - 2*L
 
-def reduceSetK(alpha, featToClus, popFeat, nbClus, thetas, p, divrm):
+def reduceSetK(alpha, featToClus, popFeat, nbClus, thetas, p, Pfo):
     dists = []
     valMin, ind1min, ind2min, thetaMin = 1, 0, 0, 0
     for theta in list(set(featToClus)):
@@ -543,8 +575,8 @@ def reduceSetK(alpha, featToClus, popFeat, nbClus, thetas, p, divrm):
     print(p.shape)
     print(pNew.shape)
 
-    BICOld = BIC(thetas, p, alpha, featToClus, divrm)
-    BICNew = BIC(thetasNew, pNew, alpha, featToClus, divrm)
+    BICOld = BIC(thetas, p, alpha, featToClus, Pfo)
+    BICNew = BIC(thetasNew, pNew, alpha, featToClus, Pfo)
 
     print(BICOld, BICNew)
 
@@ -593,7 +625,7 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec
     nbFeat = len(featToClus)
     thetas, p = initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus)
     maskedProbs = getAllProbs(dicnnz, [], np.moveaxis(p, -1, 0), thetas, featToClus, 0, nbFeat)
-    divrm = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha.shape)
+    Pfo = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha.shape)
     maxThetas, maxP = initVars(featToClus, popFeat, nbOutputs, nbLayers, nbClus)
     prevL, L, maxL = -1e20, 0.1, -1e20
     cnt = 0
@@ -605,14 +637,14 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec
         #print(i)
         if i%10==0:  # Compute the likelihood and possibly save the results every 10 iterations
             #L = likelihood(thetas, p, alpha, featToClus)
-            L = likelihood(alpha, divrm)
+            L = likelihood(alpha, Pfo)
             print(f"Run {run} - Iter {i} - Feat {features} - Interps {nbInterp} - L={L}")
 
             if ((L - prevL) / abs(L)) < prec:
                 cnt += i-iPrev
                 if reductionK:
                     if cnt > maxCnt//2:
-                        nbClusNew, thetasNew, pNew = reduceSetK(alpha, featToClus, popFeat, nbClus, thetas, p, divrm)
+                        nbClusNew, thetasNew, pNew = reduceSetK(alpha, featToClus, popFeat, nbClus, thetas, p, Pfo)
                         if list(nbClus) != list(nbClusNew):
                             changeNbClus = True
                             nbClus, thetas, p = nbClusNew, thetasNew, pNew
@@ -635,12 +667,11 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbLayers, nbClus, maxCnt, prec
                 print("Saved")
             prevL = L
 
-        #divrm = getDivrm(alpha, thetas, p, featToClus)
         maskedProbs = getAllProbs(dicnnz, [], np.moveaxis(p, -1, 0), thetas, featToClus, 0, nbFeat)
-        divrm = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha.shape)
+        Pfo = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha.shape) # Sparse matrix of every probability for observed entries (normalization term of omega)
 
-        pNew = maximization_p(alpha, featToClus, popFeat, nbClus, thetas, p, divrm)
-        thetasNew = maximization_Theta(alpha, featToClus, popFeat, nbClus, thetas, p, phim, coeffBin, divrm)
+        pNew = maximization_p(alpha, featToClus, popFeat, nbClus, thetas, p, Pfo)
+        thetasNew = maximization_Theta(alpha, featToClus, popFeat, nbClus, thetas, p, phim, coeffBin, Pfo)
         p = pNew
         thetas = thetasNew
 
@@ -844,7 +875,7 @@ if False:  # If we want to specify precisely what to do ; UI
 
 else:  # EXPERIMENTAL SETUP
     try:
-        folder=sys.argv[1]
+        #folder=sys.argv[1]
         prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
         maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
         saveToFile = True
@@ -852,7 +883,7 @@ else:  # EXPERIMENTAL SETUP
         nbRuns = 100
         reductionK = False
         lim = -1
-        #folder = "Drugs"
+        folder = "Drugs"
         # Features, DS, nbInterp, nbClus, buildData, seuil
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
@@ -869,9 +900,12 @@ else:  # EXPERIMENTAL SETUP
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
             list_params = []
+            list_params.append(([0, 1], [2, 2], [2, 2], [1, 2], False, 0))
+            '''
             list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], False, 0))
             list_params.append(([0, 1], [3, 3], [2, 2], [5, 5], False, 0))
             list_params.append(([0, 1], [3, 3], [3, 3], [5, 5], False, 0))
+            '''
         if "imdb" in folder.lower():
             # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
             nbRuns = 10
@@ -889,6 +923,8 @@ else:  # EXPERIMENTAL SETUP
         if "drugs" in folder.lower():
             # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
             list_params = []
+            list_params.append(([0], [3], [3], [3], False, 0))
+            '''
             list_params.append(([0], [3], [1], [7], False, 0))
             list_params.append(([0], [3], [2], [7], False, 0))
             list_params.append(([0], [3], [3], [7], False, 0))
@@ -900,6 +936,7 @@ else:  # EXPERIMENTAL SETUP
             list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [7, 3, 3, 5], False, 0))
             list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [7, 3, 3, 5], False, 0))
             list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [7, 3, 3, 5], False, 0))
+            '''
         if "mrbanks" in folder.lower():
             # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
             list_params = []
