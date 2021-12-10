@@ -30,49 +30,6 @@ fp = open("memory_profiler_Norm.log", "a")
 @profile(stream=fp, precision=5)
 '''
 
-'''  Why we cannot set the initial diagonals equals to frequency
-popFeat = [200]
-nbClus = [20]
-nbOutputs = 100
-nbInterp = [2]
-A = np.random.random((popFeat[0], nbClus[0]))
-
-shape = []
-for i, p in enumerate(popFeat):
-    for _ in range(nbInterp[i]):
-        shape.append(p)
-shape.append(nbOutputs)
-
-Z = np.random.random(shape)
-Z_mask = np.zeros(shape)
-indices_diag = None
-for i, dim in enumerate(nbInterp):
-    n = popFeat[i]
-    if dim == 1:
-        x = np.ones((n))
-    else:
-        x = np.zeros([n for _ in range(dim)])
-        L = np.ones((n))
-        x[np.diag_indices(n, ndim=dim)] = L
-    if indices_diag is None:
-        indices_diag = x
-    else:
-        indices_diag = np.tensordot(indices_diag, x, axe=0)
-indices_diag = np.tensordot(indices_diag, np.ones((nbOutputs)), axes=0)
-Z_mask[indices_diag.astype(bool)] = 1
-Z *= Z_mask
-Z_mask = Z_mask.astype(bool)
-# AX = B
-
-X_inf = np.linalg.pinv(A).dot(np.linalg.pinv(A).dot(Z))
-print(np.allclose(A.dot(A.dot(X_inf))[Z_mask], Z[Z_mask]))
-print(list(A.dot(A.dot(X_inf))[Z_mask].flatten()))
-print(list(Z[Z_mask].flatten()))
-print(np.abs(np.mean(A.dot(A.dot(X_inf))[Z_mask]-Z[Z_mask])))
-sys.exit()
-'''
-
-
 seed = 111
 np.random.seed(seed)
 random.seed(seed)
@@ -112,8 +69,8 @@ def readMatrix(filename):
 
     # return sparse.csr_matrix(new_data)
 
-# Saves the model's parameters theta, p, corresponding likelihood and held-out likelihood
-def writeToFile_params(folder, thetas, p, maxL, HOL, featToClus, popFeat, nbClus, run=-1):
+# Saves the model's parameters theta, p
+def writeToFile_params(folder, thetas, p, maxL, featToClus, popFeat, nbClus, run=-1):
     while True:
         try:
             s=""
@@ -133,10 +90,6 @@ def writeToFile_params(folder, thetas, p, maxL, HOL, featToClus, popFeat, nbClus
             f.write(str(maxL) + "\n")
             f.close()
 
-            f = open(folderParams + "/T="+codeT+"_%.0f_" % (run)+s+"Inter_HOL.txt", "w")
-            f.write(str(HOL) + "\n")
-            f.close()
-
             f = open(folderParams + "/T="+codeT+"_%.0f_" % (run)+s+"Inter_FeatToClus.txt", "w")
             for i in range(len(featToClus)):
                 f.write(str(i)+"\t" + str(featToClus[i]) + "\t" + str(popFeat[i]) + "\n")
@@ -146,6 +99,36 @@ def writeToFile_params(folder, thetas, p, maxL, HOL, featToClus, popFeat, nbClus
 
         except Exception as e:
             print("Retrying to write file -", e)
+
+# Makes alpha fit the wanted number of interactions for each nature
+def reduceAlphaInter(alpha, DS, nbInterp):
+    toRem, ind = [], 0
+    for i in range(len(DS)):
+        if DS[i] != nbInterp[i]:
+            for t in range(ind, ind+DS[i]-nbInterp[i]):
+                toRem.append(t)
+        ind += DS[i]
+    if len(toRem)!=0:
+        alpha = alpha.sum(toRem)
+    return alpha
+
+# Recursive function to build the dict whose keys are nonzero values of alpha
+def getDicNonZeros(alpha):
+    dicnnz = {}
+    coords = alpha.nonzero()
+
+    def buildDicCoords(f, dic):
+        if len(f)==1:
+            dic[f[0]]=1
+        else:
+            if f[0] not in dic: dic[f[0]]={}
+            dic[f[0]] = buildDicCoords(f[1:], dic[f[0]])
+
+        return dic
+
+    for f in zip(*coords):
+        dicnnz = buildDicCoords(f, dicnnz)
+    return dicnnz
 
 def normalized(a, axis=-1):
     l2 = np.sum(a, axis=axis)
@@ -157,20 +140,8 @@ def normalized(a, axis=-1):
 
 #// region Fit tools
 
-def likelihood(alpha, Pfo):
-    return np.sum(alpha*np.log(Pfo+1e-20))
 
-# Recursive function to build the dict whose keys are nonzero values of alpha
-def buildDicCoords(f, dic):
-    if len(f)==1:
-        dic[f[0]]=1
-    else:
-        if f[0] not in dic: dic[f[0]]={}
-        dic[f[0]] = buildDicCoords(f[1:], dic[f[0]])
-
-    return dic
-
-# Recursive function to build P_{f,o} (the denominator of omega, see main paper) as a sparse array
+# Recursive function to build an array P_{f,o} for given coordinates stored in dic (the denominator of omega, see main paper) as a sparse array
 def getAllProbs(dic, vals, prob, thetas, featToClus, feat, nbFeat):
     if feat == nbFeat:
         for k in dic:
@@ -183,6 +154,27 @@ def getAllProbs(dic, vals, prob, thetas, featToClus, feat, nbFeat):
 
     return vals
 
+
+def likelihood(alpha, Pfo):
+    return np.sum(alpha*np.log(Pfo+1e-20))
+
+# Normalization term used in maximizationTheta, can be computed once for all the dataset
+def getCm(alpha, nbNatures, featToClus, popFeat):
+    Cm = []
+    for nature in range(nbNatures):
+        arrFeat = []
+        for feat in range(len(featToClus)):
+            if nature==featToClus[feat]: arrFeat.append(feat)
+
+        Cm.append(np.zeros((popFeat[arrFeat[-1]])))
+        dataa = alpha.data
+        for i, ialpha in enumerate(list(zip(*alpha.nonzero()))):
+            indAlpha = tuple(list(np.array(ialpha)[arrFeat]))
+            for m in set(indAlpha):
+                im = np.where(np.array(indAlpha)==m)[0]
+                cm = list(np.array(indAlpha)[im]).count(m)
+                Cm[nature][m] += cm*dataa[i]
+    return Cm
 
 # EM step for p
 def maximization_p(alpha, featToClus, popFeat, nbClus, theta, pPrev, Pfo):
@@ -340,36 +332,29 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbNatures, nbClus, maxCnt, pre
     maskedProbs = getAllProbs(dicnnz, [], np.moveaxis(p, -1, 0), thetas, featToClus, 0, nbFeat)
     Pfo = sparse.COO(alpha.nonzero(), np.array(maskedProbs), shape=alpha.shape)
     maxThetas, maxP = initVars(featToClus, popFeat, nbOutputs, nbNatures, nbClus)
-    prevL, L, maxL = -1e20, 0.1, -1e20
+    prevL, L, maxL = -1e20, -1e20, -1e20
     cnt = 0
-    i = 0
-    iPrev=0
-    changeNbClus = False
-    nbClusOld = nbClus
-    while i < 1000000:  # 1000000 iterations top ; prevents infinite loops but never reached in practice
+    num_iterations = 0
+    prec_iteration = 0
+    while num_iterations < 1e10:  # 1000000 iterations top ; prevents infinite loops but never reached in practice
         #print(i)
-        if i%10==0:  # Compute the likelihood and possibly save the results every 10 iterations
-            #L = likelihood(thetas, p, alpha, featToClus)
+        if num_iterations%10==0:  # Computes the likelihood and possibly save the results every 10 iterations
             L = likelihood(alpha, Pfo)
-            print(f"Run {run} - Iter {i} - Feat {features} - Interps {nbInterp} - L={L}")
+            print(f"Run {run} - Iter {num_iterations} - Feat {features} - Interps {nbInterp} - L={L}")
 
             if ((L - prevL) / abs(L)) < prec:
-                cnt += i-iPrev
-
+                cnt += num_iterations-prec_iteration
                 if cnt > maxCnt:
                         break
             else:
                 cnt = 0
 
-            iPrev=i
+            prec_iteration=num_iterations
 
-            if (L > prevL and L > maxL) or changeNbClus:
-                changeNbClus = False
+            if L > maxL:
                 maxThetas, maxP = thetas, p
                 maxL = L
-                #HOL = likelihood(thetas, p, alpha_Te, featToClus)
-                HOL = 0.
-                writeToFile_params(folder, maxThetas, maxP, maxL, HOL, featToClus, popFeat, nbClusOld, run)
+                writeToFile_params(folder, maxThetas, maxP, maxL, featToClus, popFeat, nbClus, run)
                 print("Saved")
             prevL = L
 
@@ -378,22 +363,20 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbNatures, nbClus, maxCnt, pre
 
         pNew = maximization_p(alpha, featToClus, popFeat, nbClus, thetas, p, Pfo)
         thetasNew = maximization_Theta(alpha, featToClus, nbClus, thetas, p, Cm, Pfo)
+
         p = pNew
         thetas = thetasNew
 
-        i += 1
+        num_iterations += 1
 
-    return maxThetas, maxP, maxL, nbClus
+    return maxThetas, maxP, maxL
 
 
 #// endregion
 
-def runFit(alpha_Tr, nbClus, nbInterp, prec, nbRuns, maxCnt, features):
-    print(alpha_Tr.shape)
-    nbFeat = alpha_Tr.ndim - 1
-    nbOutputs = alpha_Tr.shape[-1]
-    popFeat = [l for l in alpha_Tr.shape[:-1]]
-    print(nbClus)
+def runFit(alpha, nbClus, nbInterp, prec, nbRuns, maxCnt, features):
+    nbOutputs = alpha.shape[-1]
+    popFeat = [l for l in alpha.shape[:-1]]
     nbNatures = len(nbClus)
     featToClus = []
     nbClus = np.array(nbClus)
@@ -401,83 +384,54 @@ def runFit(alpha_Tr, nbClus, nbInterp, prec, nbRuns, maxCnt, features):
         for i in range(interp):
             featToClus.append(iter)
     featToClus = np.array(featToClus, dtype=int)
-    
-    print("Pop feats")
+
+    print("Natures (which input features have been chosen)")
+    print(features)
+    print("Pop feats (for each layer, how many different nodes)")
     print(popFeat)
-    print("Feat to clus")
+    print("Feat to clus (for each layer, which nature it belongs to)")
     print(featToClus)
-    print("Nb clus")
+    print("Nb clus (for each nature, how many clusters to use)")
     print(nbClus)
-    print("Nb interp")
+    print("Dataset (for each nature, how many interactions are considered)")
+    print(DS)
+    print("Nb interactions (for each nature, how many interactions will the model consider)")
     print(nbInterp)
+    print("Final shape of observation tensor alpha :", alpha.shape)
+    print("Number of training nplets:", alpha.sum())
 
-    dicnnz = {}
-    coords = alpha_Tr.nonzero()
-    for f in zip(*coords):
-        dicnnz = buildDicCoords(f, dicnnz)
+    dicnnz = getDicNonZeros(alpha)
 
-    Cm = []
-    for nature in range(nbNatures):
-        arrFeat = []
-        for feat in range(len(featToClus)):
-            if nature==featToClus[feat]: arrFeat.append(feat)
-
-        Cm.append(np.zeros((popFeat[arrFeat[-1]])))
-        dataa = alpha_Tr.data
-        for i, ialpha in enumerate(list(zip(*alpha_Tr.nonzero()))):
-            indAlpha = tuple(list(np.array(ialpha)[arrFeat]))
-            for m in set(indAlpha):
-                im = np.where(np.array(indAlpha)==m)[0]
-                cm = list(np.array(indAlpha)[im]).count(m)
-                Cm[nature][m] += cm*dataa[i]
+    Cm = getCm(alpha, nbNatures, featToClus, popFeat)
 
     maxL = -1e100
     for i in range(nbRuns):
         print("RUN", i)
-        theta, p, L, nbClusNew = EMLoop(alpha_Tr, featToClus, popFeat, nbOutputs, nbNatures, nbClus, maxCnt, prec, folder, i, Cm, dicnnz, nbInterp, features)
-        #HOL = likelihood(theta, p, alpha_Te, featToClus)
-        HOL=0
+        theta, p, L = EMLoop(alpha, featToClus, popFeat, nbOutputs, nbNatures, nbClus, maxCnt, prec, folder, i, Cm, dicnnz, nbInterp, features)
         if L > maxL:
             maxL = L
-            writeToFile_params(folder + "/Final/", theta, p, L, HOL, featToClus, popFeat, nbClus, -1)
+            writeToFile_params(folder + "/Final/", theta, p, L, featToClus, popFeat, nbClus, -1)
             print("######saved####### MAX L =", L)
         print("=============================== END EM ==========================")
 
 def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, propTrainingSet, prec, nbRuns, maxCnt):
-    print("Features", features)
-    print("Structure", nbInterp)
-    print("DS", DS)
-
     if buildData:
-        print("Build alphas (matrix of observations)")
+        print("Build alpha training and alpha test (matrix of observations)")
         import BuildAlpha
-        alpha_Tr, alpha_Te = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
+        alpha, _ = BuildAlpha.run(folder, DS, features, propTrainingSet, lim, seuil=seuil)
     else:
-        print("Get alphas")
+        print("Get alpha training")
         codeSave = ""
         for i in range(len(features)):
             for j in range(DS[i]):
                 codeSave += str(features[i]) + "-"
         codeSave = codeSave[:-1]
         fname = "Data/"+folder+"/"+codeSave
-        alpha_Tr, alpha_Te = readMatrix(fname+"_AlphaTr.npz"), readMatrix(fname+"_AlphaTe.npz")
+        alpha = readMatrix(fname+"_AlphaTr.npz")
 
+    alpha = reduceAlphaInter(alpha, DS, nbInterp)
 
-
-    toRem, ind = [], 0
-    for i in range(len(DS)):
-        if DS[i] != nbInterp[i]:
-            for t in range(ind, ind+DS[i]-nbInterp[i]):
-                toRem.append(t)
-        ind += DS[i]
-    if len(toRem)!=0:
-        alpha_Tr = alpha_Tr.sum(toRem)
-        alpha_Te = alpha_Te.sum(toRem)
-
-    print("Alpha:", len(alpha_Tr.data), alpha_Tr)
-    print("Number triplets training:", alpha_Tr.sum())
-
-    runFit(alpha_Tr, nbClus, nbInterp, prec, nbRuns, maxCnt, features)
+    runFit(alpha, nbClus, nbInterp, prec, nbRuns, maxCnt, features)
 
 
 
@@ -559,8 +513,8 @@ else:  # EXPERIMENTAL SETUP
     if "drugs" in folder.lower():
         # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
         list_params = []
-        list_params.append(([0], [3], [1], [7], False, 0))
         list_params.append(([0], [3], [2], [7], False, 0))
+        list_params.append(([0], [3], [1], [7], False, 0))
         list_params.append(([0], [3], [3], [7], False, 0))
 
         list_params.append(([0, 3], [3, 1], [1, 1], [7, 5], False, 0))
