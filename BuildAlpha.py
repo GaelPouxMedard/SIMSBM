@@ -125,7 +125,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
     print(alphaTr, "# triples:", alphaTr.sum())
     del dicAlpha
 
-    # Symmetry alphaTr (only useful for comparing models with different number of interactions, can be removed otherwise)
+    # Symmetry alphaTr (necessary for algorithmic simplification in maximizeTheta)
     prev = 0
     print("Enforcing symmetry", nbInterp)
     for num, i in enumerate(nbInterp):
@@ -185,7 +185,7 @@ def getAlpha(features, outcome, featToInt, outToInt, nbInterp, propTrainingSet):
     alphaTe = sparse.COO(list(zip(*dicAlpha.keys())), list(dicAlpha.values()), shape=shape)
     print(alphaTe, "# triples:", alphaTe.sum())
 
-    # Symmetry alphaTe  (only useful for comparing models with different number of interactions, can be removed otherwise)
+    # Symmetry alphaTe (necessary for algorithmic simplification in maximizeTheta)
     print("Enforcing symmetry")
     prev = 0
     for num, i in enumerate(nbInterp):
