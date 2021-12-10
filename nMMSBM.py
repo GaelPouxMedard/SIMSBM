@@ -112,6 +112,20 @@ def reduceAlphaInter(alpha, DS, nbInterp):
         alpha = alpha.sum(toRem)
     return alpha
 
+def symmetrize(alpha, nbInterp):
+    prev = 0
+    for num, i in enumerate(nbInterp):
+        permuts = list(itertools.permutations(list(range(prev, prev+int(i))), int(i)))
+        alpha2 = alpha.copy()
+        for per in permuts[1:]:
+            arrTot = np.array(list(range(len(alpha.shape))))
+            arrTot[prev:prev+i] = np.array(per)
+            #print(arrTot)
+            alphaTr2 = alpha2 + alpha.transpose(arrTot)
+        alpha = alpha2 / len(permuts)
+        prev += i
+    return alpha
+
 # Recursive function to build the dict whose keys are nonzero values of alpha
 def getDicNonZeros(alpha):
     dicnnz = {}
@@ -430,6 +444,7 @@ def runForOneDS(folder, DS, features, nbInterp, nbClus, buildData, seuil, lim, p
         alpha = readMatrix(fname+"_AlphaTr.npz")
 
     alpha = reduceAlphaInter(alpha, DS, nbInterp)
+    alpha = symmetrize(alpha, nbInterp)
 
     runFit(alpha, nbClus, nbInterp, prec, nbRuns, maxCnt, features)
 
@@ -442,7 +457,7 @@ propTrainingSet = 0.9
 nbRuns = 100
 lim = -1
 
-# Juste for it to be defined
+# Just for it to be defined
 features = []  # Which features to consider (see key)
 DS = []  # Which dataset use (some are already built for interactions)
 nbInterp = []  # How many interactions consider for each dataset (reduces DS to this number by summing)
@@ -461,6 +476,8 @@ if False:  # User interface
         nbInterp=np.array(sys.argv[4].split(","), dtype=int)
         nbClus=np.array(sys.argv[5].split(","), dtype=int)
         buildData = bool(int(sys.argv[6]))
+        seuil = int(sys.argv[7])
+        list_params = (features, DS, nbInterp, nbClus, buildData, seuil)
     except Exception as e:
         print(e)
         pass
