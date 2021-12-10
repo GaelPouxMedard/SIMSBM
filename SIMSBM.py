@@ -100,6 +100,10 @@ def writeToFile_params(folder, thetas, p, maxL, featToClus, popFeat, nbClus, run
         except Exception as e:
             print("Retrying to write file -", e)
 
+#// endregion
+
+
+#// region Toolbox
 # Makes alpha fit the wanted number of interactions for each nature
 def reduceAlphaInter(alpha, DS, nbInterp):
     toRem, ind = [], 0
@@ -387,6 +391,7 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbNatures, nbClus, maxCnt, pre
 
 
 #// endregion
+
 
 def runFit(alpha, nbClus, nbInterp, prec, nbRuns, maxCnt, features):
     nbOutputs = alpha.shape[-1]
