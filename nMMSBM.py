@@ -813,7 +813,6 @@ if False:  # If we want to specify precisely what to do ; UI
         nbInterp=np.array(sys.argv[4].split(","), dtype=int)
         nbClus=np.array(sys.argv[5].split(","), dtype=int)
         buildData = bool(int(sys.argv[6]))
-        reductionK = bool(int(sys.argv[7]))
     except Exception as e:
         print(e)
         pass
@@ -833,7 +832,7 @@ else:  # EXPERIMENTAL SETUP
         if "pubmed" in folder.lower():
             # 0 = symptoms  ;  o = disease
             list_params = []
-            list_params.append(([0], [3], [1], [20], True, 0))
+            list_params.append(([0], [3], [1], [20], False, 0))
             list_params.append(([0], [3], [2], [20], False, 0))
             list_params.append(([0], [3], [3], [20], False, 0))
         if "spotify" in folder.lower():
@@ -894,7 +893,6 @@ else:  # EXPERIMENTAL SETUP
             list_params.append(([0], [3], [1], [10], False, 0))
             list_params.append(([0], [3], [2], [10], False, 0))
             list_params.append(([0], [3], [3], [10], False, 0))
-
 
     except Exception as e:
         print(e)
