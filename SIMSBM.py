@@ -514,12 +514,9 @@ else:  # EXPERIMENTAL SETUP
     if "spotify" in folder.lower():
         # 0 = artists  ;  o = next artist
         list_params = []
-        list_params.append(([0], [3], [2], [20], False, 1))
-        '''
         list_params.append(([0], [3], [1], [20], False, 1))
         list_params.append(([0], [3], [2], [20], False, 1))
         list_params.append(([0], [3], [3], [20], False, 1))
-        '''
     if "imdb" in folder.lower():
         # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
         nbRuns = 10
