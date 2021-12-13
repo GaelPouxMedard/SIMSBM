@@ -3,15 +3,9 @@ os.environ['OPENBLAS_NUM_THREADS'] = '5'
 os.environ['MKL_NUM_THREADS'] = '5'
 import numpy as np
 import random
-# from scipy import sparse
 import sparse
-import datetime
-from copy import deepcopy as copy
-from scipy.special import binom
-import time
 import itertools
 import sys
-from itertools import product
 
 '''
 import pprofile
