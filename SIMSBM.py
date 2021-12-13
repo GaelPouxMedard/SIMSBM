@@ -73,13 +73,14 @@ def readMatrix(filename):
 def writeToFile_params(folder, thetas, p, maxL, features, featToClus, popFeat, nbClus, run=-1):
     while True:
         try:
-            if "Output" not in os.listdir("."):
-                os.mkdir("Output")
-            if folder not in os.listdir("Output"):
-                os.mkdir("Output/"+folder)
             s=""
             folderParams = "Output/" + folder + "/"
-            pass
+            curfol = "./"
+            for fol in folderParams.split("/"):
+                if fol not in os.listdir(curfol) and fol!="":
+                    os.mkdir(curfol+fol)
+                curfol += fol+"/"
+
             codeT=""
             for i in featToClus:
                 codeT += f"{features[i]}({nbClus[i]})-"
@@ -495,7 +496,7 @@ else:  # EXPERIMENTAL SETUP
     try:
         folder=sys.argv[1]
     except Exception as e:
-        folder = "Imdb"
+        folder = "Spotify"
         print("====", e, "====")
     prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
     maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
@@ -513,18 +514,18 @@ else:  # EXPERIMENTAL SETUP
     if "spotify" in folder.lower():
         # 0 = artists  ;  o = next artist
         list_params = []
+        list_params.append(([0], [3], [2], [20], False, 1))
+        '''
         list_params.append(([0], [3], [1], [20], False, 1))
         list_params.append(([0], [3], [2], [20], False, 1))
         list_params.append(([0], [3], [3], [20], False, 1))
+        '''
     if "imdb" in folder.lower():
         # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
         nbRuns = 10
         list_params = []
-        list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
-        '''
         list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
 
-        #  Attention, le nombre de clusters pour 2 modèles avec le même nombre de permutations doit être différent sinon l'un écrase l'autre (voir codeT pour les sauvegardes)
         list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], False, 0))
         list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
 
@@ -532,7 +533,6 @@ else:  # EXPERIMENTAL SETUP
         list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
 
         list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
-        '''
     if "mrbanks" in folder.lower():
         # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
         list_params = []

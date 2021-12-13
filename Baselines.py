@@ -34,14 +34,19 @@ def readMatrix(filename):
 
     # return sparse.csr_matrix(new_data)
 
-def getName(DS, nbInterp, folder, features):
-    codeSave = ""
-    for i in range(len(features)):
-        for _ in range(nbInterp[i]):
-            codeSave += str(features[i]) + "-"
-    codeSave = codeSave[:-1]
+def getName(DS, nbClus, nbInterp, folder, features):
+    featToClus = []
+    for iter, interp in enumerate(nbInterp):
+        for i in range(interp):
+            featToClus.append(iter)
+    featToClus = np.array(featToClus, dtype=int)
 
-    return "Output/" + folder + "/" + codeSave
+    codeT = ""
+    for i in featToClus:
+        codeT += f"{features[i]}({nbClus[i]})-"
+    codeT = codeT[:-1]
+
+    return "Output/" + folder + "/" + codeT
 
 def getDataTr(folder, featuresData, DS, lim=1e20):
     folderName = "Data/" + folder
@@ -250,7 +255,7 @@ def TF(DS, folder, nbClus, nbInterp, features):
     runTD(DS, folder, nbClus, nbInterp, features, norm, step, N)
 
 def run(folder, DS, features, nbClusMod1, nbInterpMod1, do_TF=True):
-    fname = getName(DS, nbInterpMod1, folder, features)
+    fname = getName(DS, nbClusMod1, nbInterpMod1, folder, features)
     print(fname)
 
     X, y, D, coordsToInt = buildArraysProbs(folder, features, DS, nbInterpMod1)

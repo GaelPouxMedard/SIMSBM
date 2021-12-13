@@ -88,7 +88,6 @@ def readMatrix(filename):
 
     #return sparse.csr_matrix(new_data)
 
-
 def recoverData(folder, DS, features):
     strT = ""
     for f, interp in enumerate(DS):
@@ -100,43 +99,47 @@ def recoverData(folder, DS, features):
 
     return alpha_Tr, alpha_Te
 
-
-def recoverParams(folder, nbClus, nbInterp, final = True, run=-1):
-    strT = ""
-    for f, [interp, clus] in enumerate(zip(nbInterp, nbClus)):
+def recoverParams(folder, features, nbClus, nbInterp, final = True, run=-1):
+    featToClus = []
+    for iter, interp in enumerate(nbInterp):
         for i in range(interp):
-            strT += str(clus) + "-"
-    strT = strT[:-1] + "_"
+            featToClus.append(iter)
+    featToClus = np.array(featToClus, dtype=int)
+
+    codeT = ""
+    for i in featToClus:
+        codeT += f"{features[i]}({nbClus[i]})-"
+    codeT = codeT[:-1]+"_"
+
     if final:
         run=-1
         featToClus = []
         popFeat = []
-        with open("Output/" + folder+"/Final/T="+strT+"%.0f_Inter_FeatToClus.txt" %run, encoding="utf-8") as f:
+        with open("Output/" + folder+"/Final/T="+codeT+"%.0f_Inter_FeatToClus.txt" %run, encoding="utf-8") as f:
             for line in f:
                 feat, clus, pop = line.replace("\n", "").split("\t")
                 featToClus.append(int(clus))
                 popFeat.append(pop)
-        p = readMatrix("Output/" + folder+"/Final/T="+strT+"%.0f_Inter_p.npy" %run)
+        p = readMatrix("Output/" + folder+"/Final/T="+codeT+"%.0f_Inter_p.npy" %run)
         thetas = []
         for i in range(len(set(featToClus))):
-            theta = readMatrix("Output/" + folder+"/Final/T="+strT+"%.0f_theta_%.0f_Inter_theta.npy" %(run, i))
+            theta = readMatrix("Output/" + folder+"/Final/T="+codeT+"%.0f_theta_%.0f_Inter_theta.npy" %(run, i))
             thetas.append(theta)
     else:
         featToClus = []
         popFeat = []
-        with open("Output/" + folder+"/T="+strT+"%.0f_Inter_FeatToClus.txt" %run, encoding="utf-8") as f:
+        with open("Output/" + folder+"/T="+codeT+"%.0f_Inter_FeatToClus.txt" %run, encoding="utf-8") as f:
             for line in f:
                 feat, clus, pop = line.replace("\n", "").split("\t")
                 featToClus.append(int(clus))
                 popFeat.append(pop)
-        p = readMatrix("Output/" + folder+"/T="+strT+"%.0f_Inter_p.npy" %run)
+        p = readMatrix("Output/" + folder+"/T="+codeT+"%.0f_Inter_p.npy" %run)
         thetas = []
         for i in range(len(set(featToClus))):
-            theta = readMatrix("Output/" + folder+"/T="+strT+"%.0f_theta_%.0f_Inter_theta.npy" %(run, i))
+            theta = readMatrix("Output/" + folder+"/T="+codeT+"%.0f_theta_%.0f_Inter_theta.npy" %(run, i))
             thetas.append(theta)
 
     return thetas, p, featToClus, popFeat
-
 
 def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False):
     try:
@@ -168,24 +171,35 @@ def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False)
 
 
 def loadModel(folder, DS, nbInterp, features, model="NB"):
-    strT = ""
-    for i in range(len(features)):
-        for _ in range(nbInterp[i]):
-            strT += str(features[i]) + "-"
-    strT = strT[:-1]
-    filename = f"Output/{folder}/" + strT + f"_{model}.sav"
+    featToClus = []
+    for iter, interp in enumerate(nbInterp):
+        for i in range(interp):
+            featToClus.append(iter)
+    featToClus = np.array(featToClus, dtype=int)
+
+    codeT = ""
+    for i in featToClus:
+        codeT += f"{features[i]}({nbClus[i]})-"
+    codeT = codeT[:-1]
+
+    filename = f"Output/{folder}/" + codeT + f"_{model}.sav"
 
     return pickle.load(open(filename, 'rb'))
 
 
 def loadMF(folder, DS, nbInterp, features, model="NMF"):
-    strT = ""
-    for i in range(len(features)):
-        for _ in range(nbInterp[i]):
-            strT += str(features[i]) + "-"
-    strT = strT[:-1]
+    featToClus = []
+    for iter, interp in enumerate(nbInterp):
+        for i in range(interp):
+            featToClus.append(iter)
+    featToClus = np.array(featToClus, dtype=int)
 
-    filename = f"Output/{folder}/" + strT + f"_{model}_"
+    codeT = ""
+    for i in featToClus:
+        codeT += f"{features[i]}({nbClus[i]})-"
+    codeT = codeT[:-1]
+
+    filename = f"Output/{folder}/" + codeT + f"_{model}_"
     W = np.load(filename+"W.npy")
     H = np.load(filename+"H.npy")
     coordToInt = {}
@@ -197,13 +211,18 @@ def loadMF(folder, DS, nbInterp, features, model="NMF"):
     return W, H, coordToInt
 
 def loadTF(folder, DS, nbInterp, features, model="TF"):
-    strT = ""
-    for i in range(len(features)):
-        for _ in range(nbInterp[i]):
-            strT += str(features[i]) + "-"
-    strT = strT[:-1]
+    featToClus = []
+    for iter, interp in enumerate(nbInterp):
+        for i in range(interp):
+            featToClus.append(iter)
+    featToClus = np.array(featToClus, dtype=int)
 
-    filename = f"Output/{folder}/" + strT + f"_{model}_"
+    codeT = ""
+    for i in featToClus:
+        codeT += f"{features[i]}({nbClus[i]})-"
+    codeT = codeT[:-1]
+
+    filename = f"Output/{folder}/" + codeT + f"_{model}_"
     print(filename)
     modU = np.load(f"{filename}U.npy", allow_pickle=True)
     modCore = np.load(f"{filename}core.npy", allow_pickle=True)
@@ -571,8 +590,8 @@ if False:  # "UI"
 
 else:  # Experimental evaluation
     try:
-        folder=sys.argv[1]
-        #folder="Drugs";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
+        #folder=sys.argv[1]
+        folder="Spotify";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
         # Features, DS, nbInterp, nbClus, buildData, seuil
         paramsDS = []
         if "pubmed" in folder.lower():
@@ -584,11 +603,14 @@ else:  # Experimental evaluation
             paramsDS.append(list_params)
         if "spotify" in folder.lower():
             # 0 = artists  ;  o = next artist
-            do_TF = True
+            do_TF = False
             list_params = []
+            list_params.append(([0], [3], [2], [20], False, 1))
+            '''
             list_params.append(([0], [3], [1], [20], False, 1))
             list_params.append(([0], [3], [2], [20], False, 1))
             list_params.append(([0], [3], [3], [20], False, 1))
+            '''
             paramsDS.append(list_params)
         if "dota" in folder.lower():
             # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
@@ -656,7 +678,6 @@ else:  # Experimental evaluation
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
             list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
             paramsDS.append(list_params)
-
         if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
             do_TF = False
@@ -686,7 +707,7 @@ for index_params, list_params in enumerate(paramsDS):
         nbOut = alpha_Tr.shape[-1]
 
         probsMod = 0.
-        thetasMod, pMod, featToClus, popFeat = recoverParams(folder, nbClus, nbInterp, final=final, run=run)
+        thetasMod, pMod, featToClus, popFeat = recoverParams(folder, features, nbClus, nbInterp, final=final, run=run)
 
 
         print("Build probs")

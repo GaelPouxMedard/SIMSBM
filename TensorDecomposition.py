@@ -37,17 +37,32 @@ def readMatrix(filename):
     # return sparse.csr_matrix(new_data)
 
 def getName(DS, folder, nbClus, nbInterp, features):
+
+    featToClus = []
+    for iter, interp in enumerate(nbInterp):
+        for i in range(interp):
+            featToClus.append(iter)
+    featToClus = np.array(featToClus, dtype=int)
+
+    codeSaveTF = ""
+    for i in featToClus:
+        codeSaveTF += f"{features[i]}({nbClus[i]})-"
+    codeSaveTF = codeSaveTF[:-1]
+
+
     codeSave = ""
     for i in range(len(DS)):
         for j in range(DS[i]):
             codeSave += str(features[i]) + "-"
     codeSave = codeSave[:-1]
 
+    '''
     codeSaveTF = ""
     for i in range(len(DS)):
         for _ in range(nbInterp[i]):
             codeSaveTF += str(features[i]) + "-"
     codeSaveTF = codeSaveTF[:-1]
+    '''
 
     featToClus = []
     nbClus = np.array(nbClus)
