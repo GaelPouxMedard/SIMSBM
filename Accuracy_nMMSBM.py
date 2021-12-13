@@ -68,7 +68,7 @@ def rescale(a):
 
 #// endregion
 
-#// region Manipulates the data files
+#// region Load the models
 
 def readMatrix(filename):
     try:
@@ -169,7 +169,6 @@ def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False)
         print(e)
         pass
 
-
 def loadModel(folder, DS, nbInterp, features, model="NB"):
     featToClus = []
     for iter, interp in enumerate(nbInterp):
@@ -185,7 +184,6 @@ def loadModel(folder, DS, nbInterp, features, model="NB"):
     filename = f"Output/{folder}/" + codeT + f"_{model}.sav"
 
     return pickle.load(open(filename, 'rb'))
-
 
 def loadMF(folder, DS, nbInterp, features, model="NMF"):
     featToClus = []
@@ -590,95 +588,95 @@ if False:  # "UI"
 
 else:  # Experimental evaluation
     try:
-        #folder=sys.argv[1]
-        folder="Spotify";print("REMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVE ME")
-        # Features, DS, nbInterp, nbClus, buildData, seuil
-        paramsDS = []
-        if "pubmed" in folder.lower():
-            # 0 = symptoms  ;  o = disease
-            list_params = []
-            list_params.append(([0], [3], [1], [20], False, 0))
-            list_params.append(([0], [3], [2], [20], False, 0))
-            list_params.append(([0], [3], [3], [20], False, 0))
-            paramsDS.append(list_params)
-        if "spotify" in folder.lower():
-            # 0 = artists  ;  o = next artist
-            do_TF = False
-            list_params = []
-            list_params.append(([0], [3], [2], [20], False, 1))
-            '''
-            list_params.append(([0], [3], [1], [20], False, 1))
-            list_params.append(([0], [3], [2], [20], False, 1))
-            list_params.append(([0], [3], [3], [20], False, 1))
-            '''
-            paramsDS.append(list_params)
-        if "dota" in folder.lower():
-            # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
-            do_TF = False
-            list_params = []
-            list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], False, 0))
-            list_params.append(([0, 1], [3, 3], [2, 2], [5, 5], False, 0))
-            list_params.append(([0, 1], [3, 3], [3, 3], [5, 5], False, 0))
-            paramsDS.append(list_params)
-        if "imdb" in folder.lower():
-            # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
-            do_TF = False
-            list_params = []
-            list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
-            paramsDS.append(list_params)
+        folder=sys.argv[1]
+    except Exception as e:
+        print("====", e, "====")
+        folder="Spotify"
+    # Features, DS, nbInterp, nbClus, buildData, seuil
+    paramsDS = []
+    if "pubmed" in folder.lower():
+        # 0 = symptoms  ;  o = disease
+        list_params = []
+        list_params.append(([0], [3], [1], [20], False, 0))
+        list_params.append(([0], [3], [2], [20], False, 0))
+        list_params.append(([0], [3], [3], [20], False, 0))
+        paramsDS.append(list_params)
+    if "spotify" in folder.lower():
+        # 0 = artists  ;  o = next artist
+        do_TF = False
+        list_params = []
+        list_params.append(([0], [3], [1], [20], False, 1))
+        list_params.append(([0], [3], [2], [20], False, 1))
+        list_params.append(([0], [3], [3], [20], False, 1))
 
-            list_params = []
-            list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], False, 0))
-            list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
-            paramsDS.append(list_params)
+        paramsDS.append(list_params)
+    if "dota" in folder.lower():
+        # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
+        do_TF = False
+        list_params = []
+        list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], False, 0))
+        list_params.append(([0, 1], [3, 3], [2, 2], [5, 5], False, 0))
+        list_params.append(([0, 1], [3, 3], [3, 3], [5, 5], False, 0))
+        paramsDS.append(list_params)
+    if "imdb" in folder.lower():
+        # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
+        do_TF = False
+        list_params = []
+        list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
+        paramsDS.append(list_params)
 
-            list_params = []
-            list_params.append(([1, 3], [1, 2], [1, 1], [10, 8], False, 0))  # Maybe too large
-            list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
-            paramsDS.append(list_params)
+        list_params = []
+        list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], False, 0))
+        list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
+        paramsDS.append(list_params)
 
-            list_params = []
-            list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
-            paramsDS.append(list_params)
-        if "drugs" in folder.lower():
-            # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
-            do_TF = False
-            list_params = []
-            list_params.append(([0], [3], [1], [7], False, 0))
-            list_params.append(([0], [3], [2], [7], False, 0))
-            list_params.append(([0], [3], [3], [7], False, 0))
-            paramsDS.append(list_params)
+        list_params = []
+        list_params.append(([1, 3], [1, 2], [1, 1], [10, 8], False, 0))  # Maybe too large
+        list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
+        paramsDS.append(list_params)
 
-            list_params = []
-            list_params.append(([0, 3], [3, 1], [1, 1], [7, 5], False, 0))
-            list_params.append(([0, 3], [3, 1], [2, 1], [7, 5], False, 0))
-            list_params.append(([0, 3], [3, 1], [3, 1], [7, 5], False, 0))
-            paramsDS.append(list_params)
+        list_params = []
+        list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
+        paramsDS.append(list_params)
+    if "drugs" in folder.lower():
+        # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
+        do_TF = False
+        list_params = []
+        list_params.append(([0], [3], [1], [7], False, 0))
+        list_params.append(([0], [3], [2], [7], False, 0))
+        list_params.append(([0], [3], [3], [7], False, 0))
+        paramsDS.append(list_params)
 
-            list_params = []
-            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [7, 3, 3, 5], False, 0))
-            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [7, 3, 3, 5], False, 0))
-            list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [7, 3, 3, 5], False, 0))
-            paramsDS.append(list_params)
-        if "mrbanks" in folder.lower():
-            # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
-            do_TF = False
-            list_params = []
-            list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
-            paramsDS.append(list_params)
+        list_params = []
+        list_params.append(([0, 3], [3, 1], [1, 1], [7, 5], False, 0))
+        list_params.append(([0, 3], [3, 1], [2, 1], [7, 5], False, 0))
+        list_params.append(([0, 3], [3, 1], [3, 1], [7, 5], False, 0))
+        paramsDS.append(list_params)
 
-            list_params = []
-            list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
-            list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
-            list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
-            paramsDS.append(list_params)
+        list_params = []
+        list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [7, 3, 3, 5], False, 0))
+        list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [7, 3, 3, 5], False, 0))
+        list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [7, 3, 3, 5], False, 0))
+        paramsDS.append(list_params)
+    if "mrbanks" in folder.lower():
+        # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
+        do_TF = False
+        list_params = []
+        list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
+        paramsDS.append(list_params)
 
-            list_params = []
-            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 1, 1, 1], [5, 5, 3, 3], False, 0))
-            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
-            list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
-            paramsDS.append(list_params)
-        if "twitter" in folder.lower():
+        list_params = []
+        list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
+        list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
+        list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
+        paramsDS.append(list_params)
+
+        list_params = []
+        list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 1, 1, 1], [5, 5, 3, 3], False, 0))
+        list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
+        list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
+        paramsDS.append(list_params)
+    if "twitter" in folder.lower():
             # 0 = history tweets ;  o = retweet
             do_TF = False
             list_params = []
@@ -687,10 +685,6 @@ else:  # Experimental evaluation
             list_params.append(([0], [3], [3], [10], False, 0))
             paramsDS.append(list_params)
 
-
-    except Exception as e:
-        print(e)
-        pass
 
 print(folder)
 allRes = []
