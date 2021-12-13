@@ -70,15 +70,19 @@ def readMatrix(filename):
     # return sparse.csr_matrix(new_data)
 
 # Saves the model's parameters theta, p
-def writeToFile_params(folder, thetas, p, maxL, featToClus, popFeat, nbClus, run=-1):
+def writeToFile_params(folder, thetas, p, maxL, features, featToClus, popFeat, nbClus, run=-1):
     while True:
         try:
+            if "Output" not in os.listdir("."):
+                os.mkdir("Output")
+            if folder not in os.listdir("Output"):
+                os.mkdir("Output/"+folder)
             s=""
             folderParams = "Output/" + folder + "/"
             pass
             codeT=""
             for i in featToClus:
-                codeT += str(nbClus[i])+"-"
+                codeT += f"{features[i]}({nbClus[i]})-"
             codeT = codeT[:-1]
 
             for i in range(len(thetas)):
@@ -201,7 +205,7 @@ def maximization_p(alpha, featToClus, popFeat, nbClus, theta, pPrev, Pfo):
     alphadivided = alpha / (Pfo + 1e-20)  # features, o
     for t in range(nbFeat):
         sizeAfterOperation = np.prod(alphadivided.shape)*theta[featToClus[nbFeat - t - 1]].shape[1]*8/alphadivided.shape[-2]
-        if sizeAfterOperation < 2e9:  # As soon as we can use non-sparse we do it (2Gb)
+        if sizeAfterOperation < 2e9 and sizeAfterOperation > 0:  # As soon as we can use non-sparse we do it (2Gb)
             #print("P dense")
             tet = theta[featToClus[nbFeat - t - 1]].T  # K F1
             alphadivided = np.dot(tet, alphadivided)
@@ -372,7 +376,7 @@ def EMLoop(alpha, featToClus, popFeat, nbOutputs, nbNatures, nbClus, maxCnt, pre
             if L > maxL:
                 maxThetas, maxP = thetas, p
                 maxL = L
-                writeToFile_params(folder, maxThetas, maxP, maxL, featToClus, popFeat, nbClus, run)
+                writeToFile_params(folder, maxThetas, maxP, maxL, features, featToClus, popFeat, nbClus, run)
                 print("Saved")
             prevL = L
 
@@ -417,7 +421,7 @@ def runFit(alpha, nbClus, nbInterp, prec, nbRuns, maxCnt, features):
     print("Nb interactions (for each nature, how many interactions will the model consider)")
     print(nbInterp)
     print("Final shape of observation tensor alpha :", alpha.shape)
-    print("Number of training nplets:", alpha.sum())
+    print("Number of training nplets:", int(alpha.sum()))
 
     dicnnz = getDicNonZeros(alpha)
 
@@ -429,7 +433,7 @@ def runFit(alpha, nbClus, nbInterp, prec, nbRuns, maxCnt, features):
         theta, p, L = EMLoop(alpha, featToClus, popFeat, nbOutputs, nbNatures, nbClus, maxCnt, prec, folder, i, Cm, dicnnz, nbInterp, features)
         if L > maxL:
             maxL = L
-            writeToFile_params(folder + "/Final/", theta, p, L, featToClus, popFeat, nbClus, -1)
+            writeToFile_params(folder + "/Final/", theta, p, L, features, featToClus, popFeat, nbClus, -1)
             print("######saved####### MAX L =", L)
         print("=============================== END EM ==========================")
 
@@ -491,7 +495,7 @@ else:  # EXPERIMENTAL SETUP
     try:
         folder=sys.argv[1]
     except Exception as e:
-        folder = "Drugs"
+        folder = "Imdb"
         print("====", e, "====")
     prec = 1e-4  # Stopping threshold : when relative variation of the likelihood over 10 steps is < to prec
     maxCnt = 30  # Number of consecutive times the relative variation is lesser than prec for the algorithm to stop
@@ -512,16 +516,12 @@ else:  # EXPERIMENTAL SETUP
         list_params.append(([0], [3], [1], [20], False, 1))
         list_params.append(([0], [3], [2], [20], False, 1))
         list_params.append(([0], [3], [3], [20], False, 1))
-    if "dota" in folder.lower():
-        # 0 = characters team 1, 1 = characters team 2  ;  o = victory/defeat
-        list_params = []
-        list_params.append(([0, 1], [3, 3], [1, 1], [5, 5], False, 0))
-        list_params.append(([0, 1], [3, 3], [2, 2], [5, 5], False, 0))
-        list_params.append(([0, 1], [3, 3], [3, 3], [5, 5], False, 0))
     if "imdb" in folder.lower():
         # 0 = movie, 1 = user, 2 = director, 3 = cast  ;  o = rating
         nbRuns = 10
         list_params = []
+        list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
+        '''
         list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
 
         #  Attention, le nombre de clusters pour 2 modèles avec le même nombre de permutations doit être différent sinon l'un écrase l'autre (voir codeT pour les sauvegardes)
@@ -532,20 +532,7 @@ else:  # EXPERIMENTAL SETUP
         list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
 
         list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
-    if "drugs" in folder.lower():
-        # 0 = drugs, 1 = age, 2 = gender, 3 = education  ;  o = attitude (NotSensationSeeking, Introvert, Closed, Calm, Unpleasant, Unconcious, NonNeurotics)
-        list_params = []
-        list_params.append(([0], [3], [2], [7], False, 0))
-        list_params.append(([0], [3], [1], [7], False, 0))
-        list_params.append(([0], [3], [3], [7], False, 0))
-
-        list_params.append(([0, 3], [3, 1], [1, 1], [7, 5], False, 0))
-        list_params.append(([0, 3], [3, 1], [2, 1], [7, 5], False, 0))
-        list_params.append(([0, 3], [3, 1], [3, 1], [7, 5], False, 0))
-
-        list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [1, 1, 1, 1], [7, 3, 3, 5], False, 0))
-        list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [2, 1, 1, 1], [7, 3, 3, 5], False, 0))
-        list_params.append(([0, 1, 2, 3], [3, 1, 1, 1], [3, 1, 1, 1], [7, 3, 3, 5], False, 0))
+        '''
     if "mrbanks" in folder.lower():
         # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
         list_params = []
@@ -558,12 +545,6 @@ else:  # EXPERIMENTAL SETUP
         list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 1, 1, 1], [5, 5, 3, 3], False, 0))
         list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 2, 1, 1], [5, 5, 3, 3], False, 0))
         list_params.append(([0, 1, 2, 3], [1, 3, 1, 1], [1, 3, 1, 1], [5, 5, 3, 3], False, 0))
-    if "twitter" in folder.lower():
-            # 0 = history tweets ;  o = retweet
-            list_params = []
-            list_params.append(([0], [3], [1], [10], False, 0))
-            list_params.append(([0], [3], [2], [10], False, 0))
-            list_params.append(([0], [3], [3], [10], False, 0))
 
 
 for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
