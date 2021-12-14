@@ -1,0 +1,7 @@
+marketDw	0
+usrRight	1
+noExp	2
+marketUp	3
+usrWrong	4
+expDw	5
+expUp	6

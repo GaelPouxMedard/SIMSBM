@@ -1,0 +1,13 @@
+Pain	0
+Neurologic_Manifestations	1
+Obesity	2
+Sleep_Disorders	3
+Diarrhea	4
+Mental_Retardation	5
+Sensation_Disorders	6
+Urinary_Bladder	7
+Hearing_Loss	8
+Hearing_Disorders	9
+Dyskinesias	10
+Paralysis	11
+Urinary_Incontinence	12
