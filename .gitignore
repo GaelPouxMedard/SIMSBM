@@ -1,3 +1,4 @@
-/Output/
-/Data/PubMed/Raw/
-/Data/Imdb/Big/
+Output/
+Data/Imdb/Big/ratings.csv
+Data/Imdb/Big/credits.csv
+Data/PubMed/Raw/disease-pmids.tsv.gz
