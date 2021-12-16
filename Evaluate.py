@@ -679,13 +679,13 @@ else:  # Experimental evaluation
         # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
         do_TF = False
         list_params = []
-        list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
-        list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
-        list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
+        list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
         paramsDS.append(list_params)
 
         list_params = []
-        list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
+        list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
+        list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
+        list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
         paramsDS.append(list_params)
 
         list_params = []
@@ -714,13 +714,14 @@ for index_params, list_params in enumerate(paramsDS):
         else:
             final=False
             runs = list(range(100))
-            # ======== TO REMOVE
-            # === TEST WITH RUN 1001
-            runs = [1]
 
         for run in runs:
             probsMod = 0.
-            thetasMod, pMod, featToClus, popFeat = recoverParams(folder, features, nbClus, nbInterp, final=final, run=run)
+            try:
+                thetasMod, pMod, featToClus, popFeat = recoverParams(folder, features, nbClus, nbInterp, final=final, run=run)
+            except:
+                print("Run not present")
+                continue
 
 
             print("Build probs")
