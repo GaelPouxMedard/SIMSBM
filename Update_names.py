@@ -47,13 +47,13 @@ if "mrbanks" in folder.lower():
     # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
     do_TF = False
     list_params = []
-    list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
-    list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
-    list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
+    list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
     paramsDS.append(list_params)
 
     list_params = []
-    list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
+    list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
+    list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
+    list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
     paramsDS.append(list_params)
 
     list_params = []
@@ -99,8 +99,10 @@ for index_params, list_params in enumerate(paramsDS):
         codeToldBL = ""
         for i in range(len(nbInterp)):
             for _ in range(nbInterp[i]):
-                codeToldBL += f"{i}-"
+                codeToldBL += f"{features[i]}-"
         codeToldBL = codeToldBL[:-1] + "_"
+
+        print(codeToldBL)
 
         files = os.listdir(os.curdir + "Output/" + folder)
         for file in files:
@@ -115,6 +117,7 @@ for index_params, list_params in enumerate(paramsDS):
                 os.rename(os.curdir + "Output/" + folder + "/" + file,
                           os.curdir + "Output/" + folder + "/" + file.replace(codeTold, codeTnew))
 
+
         files = os.listdir(os.curdir + "Output/" + folder + "/Final")
         for file in files:
             if codeToldBL in file and codeToldBL == file[:len(codeToldBL)]:
@@ -123,7 +126,6 @@ for index_params, list_params in enumerate(paramsDS):
                           os.curdir + "Output/" + folder + "/Final" + "/" + file.replace(codeToldBL, codeTnewBL))
 
             if codeTold in file and "T=" + codeTold == file[:len(codeTold) + 2]:
-                pass
                 print(codeTold, file)
                 os.rename(os.curdir + "Output/" + folder + "/Final" + "/" + file,
                           os.curdir + "Output/" + folder + "/Final" + "/" + file.replace(codeTold, codeTnew))
