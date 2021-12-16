@@ -3,7 +3,7 @@ import numpy as np
 
 import os
 
-os.curdir = "D:/These/Codes/Articles/SIMSBM/"
+os.curdir = "./"
 
 paramsDS = []
 if "pubmed" in folder.lower():
