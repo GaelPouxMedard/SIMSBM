@@ -715,6 +715,7 @@ for index_params, list_params in enumerate(paramsDS):
             final=False
             runs = list(range(100))
 
+        firstRunConsidered = True
         for run in runs:
             probsMod = 0.
             try:
@@ -729,14 +730,16 @@ for index_params, list_params in enumerate(paramsDS):
                 buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, thetasMod, pMod, featToClus, nbInterp)
 
             print("Compute metrics")
-            tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut, run)
-            tabMetricsAll = scores(listTrue, listProbNMF, listWeights, f"NMF_{nbInterp}", tabMetricsAll, nbOut, run)
-            tabMetricsAll = scores(listTrue, listProbKNN, listWeights, f"KNN_{nbInterp}", tabMetricsAll, nbOut, run)
-            tabMetricsAll = scores(listTrue, listProbNB, listWeights, f"NB_{nbInterp}", tabMetricsAll, nbOut, run)
             tabMetricsAll = scores(listTrue, listProbMod, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut, run)
-            tabMetricsAll = scores(listTrue, listProbBL, listWeights, f"BL_{nbInterp}", tabMetricsAll, nbOut, run)
-            tabMetricsAll = scores(listTrue, listProbPF, listWeights, f"PF_{nbInterp}", tabMetricsAll, nbOut, run)
-            tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut, run)
+            if firstRunConsidered:
+                tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut, run)
+                tabMetricsAll = scores(listTrue, listProbNMF, listWeights, f"NMF_{nbInterp}", tabMetricsAll, nbOut, run)
+                tabMetricsAll = scores(listTrue, listProbKNN, listWeights, f"KNN_{nbInterp}", tabMetricsAll, nbOut, run)
+                tabMetricsAll = scores(listTrue, listProbNB, listWeights, f"NB_{nbInterp}", tabMetricsAll, nbOut, run)
+                tabMetricsAll = scores(listTrue, listProbBL, listWeights, f"BL_{nbInterp}", tabMetricsAll, nbOut, run)
+                tabMetricsAll = scores(listTrue, listProbPF, listWeights, f"PF_{nbInterp}", tabMetricsAll, nbOut, run)
+                tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut, run)
+                firstRunConsidered = False
             print("\n\n")
             #saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
             saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final, averaged=True)
