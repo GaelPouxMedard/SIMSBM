@@ -72,7 +72,6 @@ allRes = []
 for index_params, list_params in enumerate(paramsDS):
     tabMetricsAll = {}
     for features, DS, nbInterp, nbClus, buildData, seuil in list_params:
-
         featToClus = []
         for iter, interp in enumerate(nbInterp):
             for i in range(interp):
@@ -84,23 +83,18 @@ for index_params, list_params in enumerate(paramsDS):
             codeTnew += f"{features[i]}({nbClus[i]})-"
         codeTnew = codeTnew[:-1] + "_"
 
-        # ===== TO REMOVE
         codeTold = ""
         for i in featToClus:
             codeTold += f"{nbClus[i]}-"
         codeTold = codeTold[:-1] + "_"
 
-        codeT = ""
-        for i in featToClus:
-            codeT += f"{features[i]}({nbClus[i]})-"
-        codeT = codeT[:-1]
+
 
         codeTnewBL = ""
         for i in featToClus:
             codeTnewBL += f"{features[i]}({nbClus[i]})-"
         codeTnewBL = codeTnewBL[:-1] + "_"
 
-        # ===== TO REMOVE
         codeToldBL = ""
         for i in range(len(nbInterp)):
             for _ in range(nbInterp[i]):
