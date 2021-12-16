@@ -1,4 +1,9 @@
-folder = "MrBanks"
+import sys
+
+try:
+    folder = sys.argv[1]
+except:
+    folder="MrBanks"
 import numpy as np
 
 import os
