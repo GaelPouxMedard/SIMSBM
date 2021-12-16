@@ -5,6 +5,7 @@ import numpy as np
 import sparse
 import itertools
 from sklearn import metrics
+from scipy.stats import sem
 import pickle
 import random
 import sys
@@ -138,33 +139,79 @@ def recoverParams(folder, features, nbClus, nbInterp, final = True, run=-1):
 
     return thetas, p, featToClus, popFeat
 
-def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False):
-    try:
-        if final:
-            txtFin = "_Final_"
-        else:
-            txtFin = ""
+def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False, averaged=False):
 
-        if not os.path.exists("Results/" + folder + "/"):
-            os.makedirs("Results/" + folder + "/")
-        with open("Results/" + folder + f"/_{txtFin}{features}_{DS}_Results.txt", "w+") as f:
-            firstPassage = True
-            for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
-                if firstPassage:
-                    f.write("\t")
-                    for metric in tabMetricsAll[label]:
+    if averaged:
+        fAvg = open("Results/" + folder + f"/_{features}_{DS}_Avg_Results.txt", "w+")
+        fStd = open("Results/" + folder + f"/_{features}_{DS}_Std_Results.txt", "w+")
+        fSem = open("Results/" + folder + f"/_{features}_{DS}_Sem_Results.txt", "w+")
+        fstPass = True
+        for label in tabMetricsAll:
+            dicResAllRuns = {}
+            dicResAvg = {}
+            dicResStd = {}
+            dicResSem = {}
+            for run in tabMetricsAll[label]:
+                for metric in tabMetricsAll[label][run]:
+                    if metric not in dicResAllRuns: dicResAllRuns[metric] = []
+
+                    dicResAllRuns[metric].append(tabMetricsAll[label][run][metric])
+
+            if fstPass:
+                fAvg.write("\t")
+                fStd.write("\t")
+                fSem.write("\t")
+                for metric in dicResAllRuns:
+                    fAvg.write(metric+"\t")
+                    fStd.write(metric+"\t")
+                    fSem.write(metric+"\t")
+                fAvg.write("\n")
+                fStd.write("\n")
+                fSem.write("\n")
+                fstPass = False
+
+            fAvg.write(label+"\t")
+            fStd.write(label+"\t")
+            fSem.write(label+"\t")
+            for metric in dicResAllRuns:
+                dicResAvg[metric] = np.mean(dicResAllRuns[metric])
+                dicResStd[metric] = np.std(dicResAllRuns[metric])
+                dicResSem[metric] = sem(dicResAllRuns[metric])
+
+                fAvg.write("%.4f\t" % (dicResAvg[metric]))
+                fStd.write("%.4f\t" % (dicResStd[metric]))
+                fSem.write("%.4f\t" % (dicResSem[metric]))
+            fAvg.write("\n")
+            fStd.write("\n")
+            fSem.write("\n")
+
+
+    if final:
+        txtFin = "_Final_"
+    else:
+        txtFin = ""
+
+    if not os.path.exists("Results/" + folder + "/"):
+        os.makedirs("Results/" + folder + "/")
+    with open("Results/" + folder + f"/_{txtFin}{features}_{DS}_Results.txt", "w+") as f:
+        firstPassage = True
+        for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
+            if firstPassage:
+                f.write("\trun\t")
+                for run in tabMetricsAll[label]:
+                    for metric in tabMetricsAll[label][run]:
                         f.write(metric+"\t")
                     f.write("\n")
                     firstPassage = False
-                f.write(label+"\t")
-                for metric in tabMetricsAll[label]:
-                    f.write("%.4f, " % (tabMetricsAll[label][metric]))
+                    break
+
+            for run in tabMetricsAll[label]:
+                f.write(label+"\t"+str(run)+"\t")
+                for metric in tabMetricsAll[label][run]:
+                    f.write("%.4f\t" % (tabMetricsAll[label][run][metric]))
                 f.write("\n")
                 if printRes:
-                    print(label + " " + str(tabMetricsAll[label]))
-    except Exception as e:
-        print(e)
-        pass
+                    print(label + " " + str(tabMetricsAll[label][run]))
 
 def loadModel(folder, DS, nbInterp, features, model="NB"):
     featToClus = []
@@ -497,7 +544,7 @@ def buildArraysProbs(folder, featuresCons, DS, alpha, alphaTe, thetasMod, pMod, 
 
 #// region Metrics
 
-def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
+def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut, run):
     print(f"Scores {label}")
     listTrue = np.vstack((listTrue, np.ones((nbOut))))  # Pour eviter qu'une classe n'ait aucun ex negatif ; prendre la moyenne weighted si on utilise ca !
     listProbs = np.vstack((listProbs, np.ones((nbOut))))
@@ -507,33 +554,34 @@ def scores(listTrue, listProbs, listWeights, label, tabMetricsAll, nbOut):
         listProbs[nanmask] = 0
     listWeights = np.append(listWeights, 1e-10)
     if label not in tabMetricsAll: tabMetricsAll[label]={}
+    if run not in tabMetricsAll[label]: tabMetricsAll[label][run]={}
 
-    tabMetricsAll[label]["F1"], tabMetricsAll[label]["Acc"] = 0, 0
+    tabMetricsAll[label][run]["F1"], tabMetricsAll[label][run]["Acc"] = 0, 0
     for thres in np.linspace(0, 1, 1001):
         F1 = metrics.f1_score(listTrue, (listProbs>thres).astype(int), average="weighted", sample_weight=listWeights)
         acc = metrics.accuracy_score(listTrue, (listProbs>thres).astype(int), sample_weight=listWeights)
-        if F1 > tabMetricsAll[label]["F1"]:
-            tabMetricsAll[label]["F1"] = F1
-        if acc > tabMetricsAll[label]["Acc"]:
-            tabMetricsAll[label]["Acc"] = acc
+        if F1 > tabMetricsAll[label][run]["F1"]:
+            tabMetricsAll[label][run]["F1"] = F1
+        if acc > tabMetricsAll[label][run]["Acc"]:
+            tabMetricsAll[label][run]["Acc"] = acc
 
     k = 1  # Si k=1, sklearn considère les 0 et 1 comme des classes, mais de fait on prédit jamais 0 dans un P@k...
     topk = np.argpartition(listProbs, -k, axis=1)[:, -k:]
     trueTopK = np.array([listTrue[i][topk[i]] for i in range(len(listTrue))])
     probsTopK = np.array([np.ones((len(topk[i]))) for i in range(len(listProbs))])
     if k>=2:
-        tabMetricsAll[label][f"P@{k}"] = metrics.precision_score(trueTopK, probsTopK, average="weighted", sample_weight=listWeights)
+        tabMetricsAll[label][run][f"P@{k}"] = metrics.precision_score(trueTopK, probsTopK, average="weighted", sample_weight=listWeights)
     else:
-        tabMetricsAll[label][f"P@{k}"] = np.average(trueTopK, weights=listWeights, axis=0)[0]
+        tabMetricsAll[label][run][f"P@{k}"] = np.average(trueTopK, weights=listWeights, axis=0)[0]
 
-    tabMetricsAll[label]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
-    tabMetricsAll[label]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
-    tabMetricsAll[label]["RankAvgPrec"] = metrics.label_ranking_average_precision_score(listTrue, listProbs, sample_weight=listWeights)
+    tabMetricsAll[label][run]["AUCROC"] = metrics.roc_auc_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
+    tabMetricsAll[label][run]["AUCPR"] = metrics.average_precision_score(listTrue, listProbs, average="weighted", sample_weight=listWeights)
+    tabMetricsAll[label][run]["RankAvgPrec"] = metrics.label_ranking_average_precision_score(listTrue, listProbs, sample_weight=listWeights)
     c=metrics.coverage_error(listTrue, listProbs, sample_weight=listWeights)
-    tabMetricsAll[label]["CovErr"] = c-1
-    tabMetricsAll[label]["CovErrNorm"] = (c-1)/nbOut
+    tabMetricsAll[label][run]["CovErr"] = c-1
+    tabMetricsAll[label][run]["CovErrNorm"] = (c-1)/nbOut
 
-    print(tabMetricsAll[label])
+    print(tabMetricsAll[label][run])
 
     return tabMetricsAll
 
@@ -565,10 +613,9 @@ nbInterpMod2 = [1, 1, 1, 1]
 nbInterpMod3 = [1, 1, 1, 1]
 '''
 
-final = True
-redoBL = True
+redoBL = False
 do_TF = True
-run=0
+run="All"  # "All" or "Final""
 
 if False:  # "UI"
     try:
@@ -588,10 +635,11 @@ else:  # Experimental evaluation
         folder=sys.argv[1]
     except Exception as e:
         print("====", e, "====")
-        folder="Spotify"
+        folder="MrBanks"
     # Features, DS, nbInterp, nbClus, buildData, seuil
     paramsDS = []
     if "pubmed" in folder.lower():
+        do_TF = False
         # 0 = symptoms  ;  o = disease
         list_params = []
         list_params.append(([0], [3], [1], [20], False, 0))
@@ -631,13 +679,13 @@ else:  # Experimental evaluation
         # 0 = usr, 1 = situation, 2 = gender, 3 = age, 4=key  ;  o = decision (up/down)
         do_TF = False
         list_params = []
-        list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
-        paramsDS.append(list_params)
-
-        list_params = []
         list_params.append(([0, 1], [1, 3], [1, 1], [5, 5], False, 0))
         list_params.append(([0, 1], [1, 3], [1, 2], [5, 5], False, 0))
         list_params.append(([0, 1], [1, 3], [1, 3], [5, 5], False, 0))
+        paramsDS.append(list_params)
+
+        list_params = []
+        list_params.append(([0, 4], [1, 1], [1, 1], [4, 8], False, 0))  # Complex decision making...
         paramsDS.append(list_params)
 
         list_params = []
@@ -660,44 +708,58 @@ for index_params, list_params in enumerate(paramsDS):
         alpha_Tr, alpha_Te = recoverData(folder, DS, features)
         nbOut = alpha_Tr.shape[-1]
 
-        probsMod = 0.
-        thetasMod, pMod, featToClus, popFeat = recoverParams(folder, features, nbClus, nbInterp, final=final, run=run)
+        if run=="Final":
+            final=True
+            runs = [-1]
+        else:
+            final=False
+            runs = list(range(100))
+            # ======== TO REMOVE
+            # === TEST WITH RUN 1001
+            runs = [1]
+
+        for run in runs:
+            probsMod = 0.
+            thetasMod, pMod, featToClus, popFeat = recoverParams(folder, features, nbClus, nbInterp, final=final, run=run)
 
 
-        print("Build probs")
-        listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
-            buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, thetasMod, pMod, featToClus, nbInterp)
+            print("Build probs")
+            listTrue, listProbMod, listProbBL, listProbPF, listProbNMF, listProbTF, listProbKNN, listProbNB, listProbRand, listWeights = \
+                buildArraysProbs(folder, features, DS, alpha_Tr, alpha_Te, thetasMod, pMod, featToClus, nbInterp)
 
-        print("Compute metrics")
-        tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbNMF, listWeights, f"NMF_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbKNN, listWeights, f"KNN_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbNB, listWeights, f"NB_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbMod, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbBL, listWeights, f"BL_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbPF, listWeights, f"PF_{nbInterp}", tabMetricsAll, nbOut)
-        tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut)
-        print("\n\n")
-        saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
+            print("Compute metrics")
+            tabMetricsAll = scores(listTrue, listProbTF, listWeights, f"TF_{nbInterp}", tabMetricsAll, nbOut, run)
+            tabMetricsAll = scores(listTrue, listProbNMF, listWeights, f"NMF_{nbInterp}", tabMetricsAll, nbOut, run)
+            tabMetricsAll = scores(listTrue, listProbKNN, listWeights, f"KNN_{nbInterp}", tabMetricsAll, nbOut, run)
+            tabMetricsAll = scores(listTrue, listProbNB, listWeights, f"NB_{nbInterp}", tabMetricsAll, nbOut, run)
+            tabMetricsAll = scores(listTrue, listProbMod, listWeights, f"nMMSBM_{nbInterp}", tabMetricsAll, nbOut, run)
+            tabMetricsAll = scores(listTrue, listProbBL, listWeights, f"BL_{nbInterp}", tabMetricsAll, nbOut, run)
+            tabMetricsAll = scores(listTrue, listProbPF, listWeights, f"PF_{nbInterp}", tabMetricsAll, nbOut, run)
+            tabMetricsAll = scores(listTrue, listProbRand, listWeights, f"Rand_{nbInterp}", tabMetricsAll, nbOut, run)
+            print("\n\n")
+            #saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
+            saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final, averaged=True)
 
-    allRes.append(tabMetricsAll)
+        allRes.append(tabMetricsAll)
 
-    for tabMetricsAll in allRes:
-        strRes = ""
-        firstPassage = True
-        for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
-            if firstPassage:
-                strRes += "\t"
-                for metric in tabMetricsAll[label]:
-                    strRes += metric+"\t"
-                strRes += "\n"
-                firstPassage = False
-            strRes += label+"\t"
-            for metric in tabMetricsAll[label]:
-                strRes += "%.4f\t" % (tabMetricsAll[label][metric])
-            strRes += "\n"
+        for tabMetricsAll in allRes:
+            strRes = ""
+            firstPassage = True
+            for label in sorted(list(tabMetricsAll.keys()), key=lambda x: "".join(list(reversed(x)))):
+                if firstPassage:
+                    strRes += "\t"
+                    for run in tabMetricsAll[label]:
+                        for metric in tabMetricsAll[label][run]:
+                            strRes += metric+"\t"
+                        strRes += "\n"
+                        firstPassage = False
+                strRes += label+"\t"
+                for run in tabMetricsAll[label]:
+                    for metric in tabMetricsAll[label][run]:
+                        strRes += "%.4f\t" % (tabMetricsAll[label][run][metric])
+                    strRes += "\n"
 
-        print(strRes.expandtabs(20))
+            print(strRes.expandtabs(20))
 
 pause()
 
