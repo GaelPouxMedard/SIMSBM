@@ -139,12 +139,12 @@ def recoverParams(folder, features, nbClus, nbInterp, final = True, run=-1):
 
     return thetas, p, featToClus, popFeat
 
-def saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=False, averaged=False):
+def saveResults(tabMetricsAll, folder, features, DS, runs, printRes=True, final=False, averaged=False):
 
     if averaged:
-        fAvg = open("Results/" + folder + f"/_{features}_{DS}_Avg_Results.txt", "w+")
-        fStd = open("Results/" + folder + f"/_{features}_{DS}_Std_Results.txt", "w+")
-        fSem = open("Results/" + folder + f"/_{features}_{DS}_Sem_Results.txt", "w+")
+        fAvg = open("Results/" + folder + f"/_{features}_{DS}_{max(runs)}runs_Avg_Results.txt", "w+")
+        fStd = open("Results/" + folder + f"/_{features}_{DS}_{max(runs)}runs_Std_Results.txt", "w+")
+        fSem = open("Results/" + folder + f"/_{features}_{DS}_{max(runs)}runs_Sem_Results.txt", "w+")
         fstPass = True
         for label in tabMetricsAll:
             dicResAllRuns = {}
@@ -713,7 +713,7 @@ for index_params, list_params in enumerate(paramsDS):
             runs = [-1]
         else:
             final=False
-            runs = list(range(100))
+            runs = list(range(10))
 
         firstRunConsidered = True
         for run in runs:
@@ -742,7 +742,7 @@ for index_params, list_params in enumerate(paramsDS):
                 firstRunConsidered = False
             print("\n\n")
             #saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final)
-            saveResults(tabMetricsAll, folder, features, DS, printRes=True, final=final, averaged=True)
+            saveResults(tabMetricsAll, folder, features, DS, runs, printRes=True, final=final, averaged=True)
 
         allRes.append(tabMetricsAll)
 
