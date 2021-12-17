@@ -613,7 +613,7 @@ nbInterpMod2 = [1, 1, 1, 1]
 nbInterpMod3 = [1, 1, 1, 1]
 '''
 
-redoBL = False
+redoBL = True
 do_TF = True
 run="All"  # "All" or "Final""
 
