@@ -516,7 +516,6 @@ else:  # EXPERIMENTAL SETUP
         list_params = []
         '''
         list_params.append(([0, 1], [1, 1], [1, 1], [10, 10], False, 0))  # Antonia
-        '''
 
         list_params.append(([2, 3], [1, 2], [1, 1], [8, 8], False, 0))
         list_params.append(([2, 3], [1, 2], [1, 2], [8, 8], False, 0))
@@ -525,6 +524,7 @@ else:  # EXPERIMENTAL SETUP
         list_params.append(([1, 3], [1, 2], [1, 1], [10, 8], False, 0))  # Maybe too large
         list_params.append(([1, 3], [1, 2], [1, 2], [10, 8], False, 0))
 
+        '''
         list_params.append(([1, 2, 3], [1, 1, 1], [1, 1, 1], [10, 10, 10], False, 0))
         '''
     if "mrbanks" in folder.lower():
