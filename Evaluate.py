@@ -713,7 +713,7 @@ for index_params, list_params in enumerate(paramsDS):
             runs = [-1]
         else:
             final=False
-            runs = list(range(10))
+            runs = list(range(100))
 
         firstRunConsidered = True
         for run in runs:
