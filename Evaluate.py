@@ -142,9 +142,9 @@ def recoverParams(folder, features, nbClus, nbInterp, final = True, run=-1):
 def saveResults(tabMetricsAll, folder, features, DS, runs, printRes=True, final=False, averaged=False):
 
     if averaged:
-        fAvg = open("Results/" + folder + f"/_{features}_{DS}_{max(runs)}runs_Avg_Results.txt", "w+")
-        fStd = open("Results/" + folder + f"/_{features}_{DS}_{max(runs)}runs_Std_Results.txt", "w+")
-        fSem = open("Results/" + folder + f"/_{features}_{DS}_{max(runs)}runs_Sem_Results.txt", "w+")
+        fAvg = open("Results/" + folder + f"/_{features}_{DS}_Avg_Results.txt", "w+")
+        fStd = open("Results/" + folder + f"/_{features}_{DS}_Std_Results.txt", "w+")
+        fSem = open("Results/" + folder + f"/_{features}_{DS}_Sem_Results.txt", "w+")
         fstPass = True
         for label in tabMetricsAll:
             dicResAllRuns = {}
