@@ -1,0 +1,17 @@
+	F1	Acc	P@1	AUCROC	AUCPR	RankAvgPrec	CovErr	CovErrNorm	
+nMMSBM_[1, 1]	0.0001	0.0004	0.0002	0.0001	0.0001	0.0001	0.0011	0.0001	
+TF_[1, 1]	nan	nan	nan	nan	nan	nan	nan	nan	
+NMF_[1, 1]	nan	nan	nan	nan	nan	nan	nan	nan	
+KNN_[1, 1]	nan	nan	nan	nan	nan	nan	nan	nan	
+NB_[1, 1]	nan	nan	nan	nan	nan	nan	nan	nan	
+BL_[1, 1]	nan	nan	nan	nan	nan	nan	nan	nan	
+PF_[1, 1]	nan	nan	nan	nan	nan	nan	nan	nan	
+Rand_[1, 1]	nan	nan	nan	nan	nan	nan	nan	nan	
+nMMSBM_[1, 2]	0.0000	0.0021	0.0034	0.0005	0.0002	0.0036	0.0443	0.0044	
+TF_[1, 2]	nan	nan	nan	nan	nan	nan	nan	nan	
+NMF_[1, 2]	nan	nan	nan	nan	nan	nan	nan	nan	
+KNN_[1, 2]	nan	nan	nan	nan	nan	nan	nan	nan	
+NB_[1, 2]	nan	nan	nan	nan	nan	nan	nan	nan	
+BL_[1, 2]	nan	nan	nan	nan	nan	nan	nan	nan	
+PF_[1, 2]	nan	nan	nan	nan	nan	nan	nan	nan	
+Rand_[1, 2]	nan	nan	nan	nan	nan	nan	nan	nan	
